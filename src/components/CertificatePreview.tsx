@@ -27,7 +27,7 @@ const Sheet = forwardRef<HTMLDivElement, Props>(function Sheet({ data, settings 
       <div className="cert-frame-thin" />
       <img src={sealImg} alt="" className="cert-watermark" />
 
-      <div className="absolute inset-[54px] flex flex-col items-center px-[60px] pt-[18px] text-center">
+      <div className="absolute inset-[54px] flex flex-col items-center px-[60px] pt-[10px] text-center">
         {settings.logo ? (
           <img src={settings.logo} alt="Organization logo" className="h-[74px] object-contain" />
         ) : (
@@ -39,29 +39,29 @@ const Sheet = forwardRef<HTMLDivElement, Props>(function Sheet({ data, settings 
         </p>
         <p className="text-[26px] leading-tight tracking-[0.04em] uppercase">{settings.ministry}</p>
 
-        <h1 className="mt-[10px] text-[58px] leading-none tracking-[0.02em] uppercase">
+        <h1 className="mt-[8px] text-[54px] leading-none tracking-[0.02em] uppercase">
           Certificate of Completion
         </h1>
 
-        <p className="mt-[10px] text-[26px]">This is to certify that</p>
+        <p className="mt-[8px] text-[24px]">This is to certify that</p>
 
-        <p className="mt-[6px] text-[44px] leading-tight font-bold italic tracking-[0.04em]">
+        <p className="mt-[4px] text-[40px] leading-tight font-bold italic tracking-[0.04em]">
           {name}
         </p>
         <div className="cert-rule mt-[2px] w-[740px]" />
 
-        <p className="mt-[16px] text-[24px]">
+        <p className="mt-[12px] text-[23px]">
           has successfully completed the comprehensive training course in
         </p>
 
-        <p className="mt-[8px] text-[42px] leading-tight tracking-[0.01em]">{training}</p>
+        <p className="mt-[6px] text-[38px] leading-tight tracking-[0.01em]">{training}</p>
 
-        <p className="mt-[14px] text-[24px]">Conducted and issued on {data.date}.</p>
-        <p className="text-[24px]">at Nairobi Training Center.</p>
+        <p className="mt-[10px] text-[22px]">Conducted and issued on {data.date}.</p>
+        <p className="text-[22px]">at Nairobi Training Center.</p>
       </div>
 
       {/* Footer row */}
-      <div className="absolute right-[70px] bottom-[64px] left-[70px] flex items-end justify-between">
+      <div className="absolute right-[70px] bottom-[52px] left-[70px] flex items-end justify-between">
         <div className="w-[280px] text-center">
           <div className="flex h-[70px] items-end justify-center">
             {settings.signature ? (
@@ -77,7 +77,7 @@ const Sheet = forwardRef<HTMLDivElement, Props>(function Sheet({ data, settings 
         </div>
 
         <div className="flex flex-col items-center">
-          <img src={sealImg} alt="Official seal" className="h-[130px] w-[130px] object-contain" />
+          <img src={sealImg} alt="Official seal" className="h-[118px] w-[118px] object-contain" />
           <p className="mt-[4px] text-[14px] tracking-[0.08em]">OFFICIAL SEAL</p>
         </div>
 
