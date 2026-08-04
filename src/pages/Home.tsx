@@ -81,8 +81,14 @@ export default function Home() {
   };
 
   const handleGenerate = () => {
-    if (!name.trim()) return toast.error("Applicant name is required");
-    if (!certificate) return toast.error("Please select a certificate");
+    if (!name.trim()) {
+      toast.error("Applicant name is required");
+      return;
+    }
+    if (!certificate) {
+      toast.error("Please select a certificate");
+      return;
+    }
 
     setGenerating(true);
     window.setTimeout(() => {
