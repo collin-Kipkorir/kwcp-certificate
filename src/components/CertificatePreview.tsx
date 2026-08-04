@@ -61,7 +61,7 @@ const Sheet = forwardRef<HTMLDivElement, Props>(function Sheet({ data, settings 
       </div>
 
       {/* Footer row */}
-      <div className="absolute right-[70px] bottom-[52px] left-[70px] flex items-end justify-between">
+      <div className="absolute right-[70px] bottom-[34px] left-[70px] flex items-end justify-between">
         <div className="w-[280px] text-center">
           <div className="flex h-[70px] items-end justify-center">
             {settings.signature ? (
@@ -77,7 +77,7 @@ const Sheet = forwardRef<HTMLDivElement, Props>(function Sheet({ data, settings 
         </div>
 
         <div className="flex flex-col items-center">
-          <img src={sealImg} alt="Official seal" className="h-[118px] w-[118px] object-contain" />
+          <img src={sealImg} alt="Official seal" className="h-[104px] w-[104px] object-contain" />
           <p className="mt-[4px] text-[14px] tracking-[0.08em]">OFFICIAL SEAL</p>
         </div>
 
