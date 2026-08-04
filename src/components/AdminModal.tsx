@@ -45,10 +45,16 @@ export function AdminModal({
   const [password, setPassword] = useState("");
   const importRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (file: File | undefined, key: "logo" | "signature") => {
+  const handleUpload = async (file: File | undefined, key: "logo" | "signature"): Promise<void> => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return toast.error("Please upload an image file");
-    if (file.size > 2_000_000) return toast.error("Image must be smaller than 2 MB");
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 2_000_000) {
+      toast.error("Image must be smaller than 2 MB");
+      return;
+    }
     try {
       const dataUrl = await readFileAsDataUrl(file);
       onSave({ ...settings, [key]: dataUrl });
