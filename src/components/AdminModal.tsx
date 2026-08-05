@@ -45,7 +45,11 @@ export function AdminModal({
   const [password, setPassword] = useState("");
   const importRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (file: File | undefined, key: "logo" | "signature"): Promise<void> => {
+  const handleUpload = async (
+    file: File | undefined,
+    key: "logo" | "signature" | "seal" | "watermark",
+    label: string,
+  ): Promise<void> => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
@@ -58,7 +62,7 @@ export function AdminModal({
     try {
       const dataUrl = await readFileAsDataUrl(file);
       onSave({ ...settings, [key]: dataUrl });
-      toast.success(key === "logo" ? "Logo uploaded" : "Signature uploaded");
+      toast.success(`${label} uploaded`);
     } catch {
       toast.error("Upload failed");
     }
@@ -140,7 +144,7 @@ export function AdminModal({
                   id="admin-logo"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => handleUpload(e.target.files?.[0], "logo")}
+                  onChange={(e) => handleUpload(e.target.files?.[0], "logo", "Logo")}
                 />
                 {settings.logo ? (
                   <img src={settings.logo} alt="Logo preview" className="h-12 object-contain" />
@@ -152,12 +156,43 @@ export function AdminModal({
                   id="admin-signature"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => handleUpload(e.target.files?.[0], "signature")}
+                  onChange={(e) => handleUpload(e.target.files?.[0], "signature", "Signature")}
                 />
                 {settings.signature ? (
                   <img
                     src={settings.signature}
                     alt="Signature preview"
+                    className="h-12 object-contain"
+                  />
+                ) : null}
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="admin-seal">Official Seal</Label>
+                <Input
+                  id="admin-seal"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleUpload(e.target.files?.[0], "seal", "Seal")}
+                />
+                {settings.seal ? (
+                  <img src={settings.seal} alt="Seal preview" className="h-12 object-contain" />
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-watermark">Watermark Logo</Label>
+                <Input
+                  id="admin-watermark"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleUpload(e.target.files?.[0], "watermark", "Watermark")}
+                />
+                {settings.watermark ? (
+                  <img
+                    src={settings.watermark}
+                    alt="Watermark preview"
                     className="h-12 object-contain"
                   />
                 ) : null}

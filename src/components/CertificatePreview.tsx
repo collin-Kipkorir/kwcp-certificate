@@ -25,7 +25,7 @@ const Sheet = forwardRef<HTMLDivElement, Props>(function Sheet({ data, settings 
       <div className="cert-frame-red" />
       <div className="cert-frame-black" />
       <div className="cert-frame-thin" />
-      <img src={sealImg} alt="" className="cert-watermark" />
+      <img src={settings.watermark || sealImg} alt="" className="cert-watermark" />
 
       <div className="absolute inset-[54px] flex flex-col items-center px-[60px] pt-[10px] text-center">
         {settings.logo ? (
@@ -77,7 +77,11 @@ const Sheet = forwardRef<HTMLDivElement, Props>(function Sheet({ data, settings 
         </div>
 
         <div className="flex flex-col items-center">
-          <img src={sealImg} alt="Official seal" className="h-[104px] w-[104px] object-contain" />
+          <img
+            src={settings.seal || sealImg}
+            alt="Official seal"
+            className="h-[104px] w-[104px] object-contain"
+          />
           <p className="mt-[4px] text-[14px] tracking-[0.08em]">OFFICIAL SEAL</p>
         </div>
 
