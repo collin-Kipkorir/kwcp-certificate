@@ -1,6 +1,8 @@
 export interface AdminSettings {
   logo: string;
   signature: string;
+  seal: string;
+  watermark: string;
   organization: string;
   ministry: string;
 }

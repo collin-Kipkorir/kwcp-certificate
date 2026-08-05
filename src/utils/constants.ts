@@ -15,6 +15,8 @@ export const ADMIN_PASSWORD = "admin123";
 export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
   logo: "",
   signature: "",
+  seal: "",
+  watermark: "",
   organization: "Republic of Kenya",
   ministry: "Ministry of Health",
 };
