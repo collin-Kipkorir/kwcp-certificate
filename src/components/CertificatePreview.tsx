@@ -120,8 +120,11 @@ export const CertificatePreview = forwardRef<HTMLDivElement, Props>(
     }, []);
 
     return (
-      <div ref={wrapRef} className="w-full" style={{ height: 794 * scale }}>
-        <div style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}>
+      <div ref={wrapRef} className="cert-scale-outer w-full" style={{ height: 794 * scale }}>
+        <div
+          className="cert-scale-wrap"
+          style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}
+        >
           <Sheet {...props} ref={ref} />
         </div>
       </div>
