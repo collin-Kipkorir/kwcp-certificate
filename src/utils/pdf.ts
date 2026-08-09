@@ -1,13 +1,51 @@
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
+const SHEET_W = 1123;
+const SHEET_H = 794;
+
+/**
+ * The on-screen sheet lives inside a CSS `scale()` wrapper, which makes
+ * html2canvas capture it at the wrong size. Clone it into an off-screen
+ * container rendered at full 1:1 size instead.
+ */
 async function snapshot(node: HTMLElement): Promise<HTMLCanvasElement> {
-  return html2canvas(node, {
-    scale: 2,
-    backgroundColor: "#ffffff",
-    useCORS: true,
-    logging: false,
-  });
+  const holder = document.createElement("div");
+  holder.style.cssText = `position:fixed;left:-10000px;top:0;width:${SHEET_W}px;height:${SHEET_H}px;background:#fff;z-index:-1;`;
+  const clone = node.cloneNode(true) as HTMLElement;
+  clone.removeAttribute("id");
+  clone.style.transform = "none";
+  clone.style.width = `${SHEET_W}px`;
+  clone.style.height = `${SHEET_H}px`;
+  holder.appendChild(clone);
+  document.body.appendChild(holder);
+
+  // let images in the clone settle
+  await Promise.all(
+    Array.from(clone.querySelectorAll("img")).map((img) =>
+      img.complete
+        ? Promise.resolve()
+        : new Promise<void>((res) => {
+            img.onload = () => res();
+            img.onerror = () => res();
+          }),
+    ),
+  );
+
+  try {
+    return await html2canvas(clone, {
+      scale: 2,
+      width: SHEET_W,
+      height: SHEET_H,
+      windowWidth: SHEET_W,
+      windowHeight: SHEET_H,
+      backgroundColor: "#ffffff",
+      useCORS: true,
+      logging: false,
+    });
+  } finally {
+    document.body.removeChild(holder);
+  }
 }
 
 export async function downloadPdf(node: HTMLElement, fileName: string) {
