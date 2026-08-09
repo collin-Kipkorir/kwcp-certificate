@@ -194,10 +194,22 @@
   #printable-certificate * {
     visibility: visible;
   }
+  /* Neutralise the responsive scale wrapper so the sheet prints 1:1 */
+  .cert-scale-outer,
+  .cert-scale-wrap {
+    height: auto !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
   #printable-certificate {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 287mm; /* A4 landscape 297mm - 2 x 5mm margin */
+    height: 200mm; /* 210mm - 2 x 5mm margin */
+    margin: 5mm;
     transform: none !important;
+    box-shadow: none !important;
   }
   @page {
     size: A4 landscape;
