@@ -1,8 +1,17 @@
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 
 const SHEET_W = 1123;
 const SHEET_H = 794;
+const PDF_MARGIN_MM = 5;
+
+function safeFileName(value: string): string {
+  const cleaned = value
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+  return cleaned || "certificate";
+}
 
 /**
  * The on-screen sheet lives inside a CSS `scale()` wrapper, which makes
@@ -50,27 +59,34 @@ async function snapshot(node: HTMLElement): Promise<HTMLCanvasElement> {
 
 export async function downloadPdf(node: HTMLElement, fileName: string) {
   const canvas = await snapshot(node);
-  const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-  const margin = 5; // small 5mm margin
+  const pdf = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4",
+    compress: true,
+  });
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
-  const maxW = pageW - margin * 2;
-  const maxH = pageH - margin * 2;
+  const maxW = pageW - PDF_MARGIN_MM * 2;
+  const maxH = pageH - PDF_MARGIN_MM * 2;
   const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
   const w = canvas.width * ratio;
   const h = canvas.height * ratio;
   const x = (pageW - w) / 2;
   const y = (pageH - h) / 2;
-  pdf.addImage(canvas.toDataURL("image/jpeg", 1.0), "JPEG", x, y, w, h, undefined, "FAST");
-  pdf.save(`${fileName}.pdf`);
+  const image = canvas.toDataURL("image/jpeg", 0.96);
+  pdf.addImage(image, "JPEG", x, y, w, h, undefined, "FAST");
+  pdf.save(`${safeFileName(fileName)}.pdf`);
 }
 
 export async function downloadPng(node: HTMLElement, fileName: string) {
   const canvas = await snapshot(node);
   const link = document.createElement("a");
   link.href = canvas.toDataURL("image/png");
-  link.download = `${fileName}.png`;
+  link.download = `${safeFileName(fileName)}.png`;
+  document.body.appendChild(link);
   link.click();
+  link.remove();
 }
 
 export function printCertificate() {
