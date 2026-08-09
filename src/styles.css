@@ -205,10 +205,11 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 287mm; /* A4 landscape 297mm - 2 x 5mm margin */
-    height: 200mm; /* 210mm - 2 x 5mm margin */
-    margin: 5mm;
-    transform: none !important;
+    width: 1123px; /* exactly A4 landscape at 96dpi */
+    height: 794px;
+    /* shrink slightly to leave a ~5mm margin on all sides */
+    transform: translate(5mm, 5mm) scale(0.9615) !important;
+    transform-origin: top left !important;
     box-shadow: none !important;
   }
   @page {
