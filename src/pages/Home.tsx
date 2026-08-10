@@ -90,6 +90,14 @@ export default function Home() {
       return;
     }
 
+    const key = (n: string, c: string) => `${n.trim().toLowerCase()}|${c.trim().toLowerCase()}`;
+    const existing = certificates.find((c) => key(c.name, c.certificate) === key(name, certificate));
+    if (existing) {
+      setIssued(existing);
+      toast.info(`Existing certificate ${existing.id} loaded for this person and title`);
+      return;
+    }
+
     setGenerating(true);
     window.setTimeout(() => {
       const date = formatCertificateDate();
