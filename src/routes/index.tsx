@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Home from "@/pages/Home";
+import { AuthProvider } from "@/context/AuthContext";
 
-const title = "Certificate Generation Portal | Instant Official Certificates";
+const title = "KWCP — Kenya Workers Certification Portal";
 const description =
-  "Generate, preview, print and download official training certificates with QR verification — all stored locally in your browser.";
+  "Register, generate and download QR-verified Kenyan worker training certificates. Unlock instant A4 PDF downloads with M-Pesa STK Push payment.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,5 +17,13 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Home,
+  component: Page,
 });
+
+function Page() {
+  return (
+    <AuthProvider>
+      <Home />
+    </AuthProvider>
+  );
+}

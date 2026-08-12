@@ -20,3 +20,26 @@ export interface CertificateDraft {
   name: string;
   certificate: string;
 }
+
+export interface AppUser {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  nationalId: string;
+  county: string;
+  createdAt: string;
+}
+
+export interface StoredUser extends AppUser {
+  passwordHash: string;
+}
+
+export interface PaymentRecord {
+  certificateId: string;
+  userId: string;
+  amount: number;
+  phone: string;
+  receipt: string;
+  paidAt: string;
+}
