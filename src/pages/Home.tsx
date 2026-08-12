@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { FiCheckCircle, FiDownload, FiSearch } from "react-icons/fi";
+import { FiCheckCircle, FiEye, FiLock, FiSearch } from "react-icons/fi";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CertificateForm } from "@/components/CertificateForm";
 import { CertificatePreview } from "@/components/CertificatePreview";
 import { AdminModal } from "@/components/AdminModal";
+import { AuthScreen } from "@/components/AuthScreen";
+import { PaymentModal } from "@/components/PaymentModal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { isPaid, loadPayments, savePayment } from "@/utils/auth";
 import { buildCertificateNumber, buildQrPayload, formatCertificateDate } from "@/utils/certificate";
 import { downloadPdf, downloadPng, printCertificate } from "@/utils/pdf";
 import {
@@ -22,20 +26,23 @@ import {
   saveDraft,
   saveTheme,
 } from "@/utils/localStorage";
-import { DEFAULT_ADMIN_SETTINGS } from "@/utils/constants";
-import type { AdminSettings, GeneratedCertificate } from "@/types/Certificate";
+import { DEFAULT_ADMIN_SETTINGS, priceFor } from "@/utils/constants";
+import type { AdminSettings, GeneratedCertificate, PaymentRecord } from "@/types/Certificate";
 
 export default function Home() {
+  const { user, ready, logout } = useAuth();
   const sheetRef = useRef<HTMLDivElement>(null);
 
   const [settings, setSettings] = useState<AdminSettings>(DEFAULT_ADMIN_SETTINGS);
   const [counter, setCounter] = useState(1);
   const [certificates, setCertificates] = useState<GeneratedCertificate[]>([]);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [name, setName] = useState("");
   const [certificate, setCertificate] = useState("");
   const [generating, setGenerating] = useState(false);
   const [issued, setIssued] = useState<GeneratedCertificate | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [query, setQuery] = useState("");
 
@@ -43,6 +50,7 @@ export default function Home() {
     setSettings(loadAdminSettings());
     setCounter(loadCounter());
     setCertificates(loadCertificates());
+    setPayments(loadPayments());
   };
 
   useEffect(() => {
@@ -56,6 +64,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (user && !name) setName(user.fullName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
     saveDraft({ name, certificate });
   }, [name, certificate]);
 
@@ -67,6 +80,9 @@ export default function Home() {
     certificate,
     date: today,
   };
+
+  const paid = Boolean(issued && isPaid(payments, issued.id));
+  const price = priceFor(certificate || preview.certificate);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -118,12 +134,23 @@ export default function Home() {
       saveCounter(nextCounter);
       setIssued(record);
       setGenerating(false);
-      toast.success(`Certificate ${id} generated`);
+      toast.success(`Certificate ${id} generated — pay to unlock the download`);
     }, 700);
+  };
+
+  const requirePayment = () => {
+    if (!issued) return true;
+    if (!paid) {
+      setPayOpen(true);
+      toast.info("Complete the M-Pesa payment to unlock this certificate");
+      return true;
+    }
+    return false;
   };
 
   const withSheet = async (fn: (node: HTMLElement, fileName: string) => Promise<void>) => {
     if (!sheetRef.current || !issued) return;
+    if (requirePayment()) return;
     const t = toast.loading("Preparing file…");
     try {
       await fn(sheetRef.current, `${issued.id}-${issued.name.replace(/\s+/g, "-")}`);
@@ -133,8 +160,28 @@ export default function Home() {
     }
   };
 
+  const handlePrint = () => {
+    if (requirePayment()) return;
+    printCertificate();
+  };
+
+  const handlePaid = (phone: string, receipt: string) => {
+    if (!issued || !user) return;
+    const record: PaymentRecord = {
+      certificateId: issued.id,
+      userId: user.id,
+      amount: priceFor(issued.certificate),
+      phone,
+      receipt,
+      paidAt: new Date().toISOString(),
+    };
+    savePayment(record);
+    setPayments(loadPayments());
+    toast.success(`Payment confirmed · Receipt ${receipt}`);
+  };
+
   const reset = () => {
-    setName("");
+    setName(user?.fullName ?? "");
     setCertificate("");
     setIssued(null);
   };
@@ -148,6 +195,14 @@ export default function Home() {
     )
     .slice(0, 10);
 
+  if (!ready) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header
@@ -156,6 +211,11 @@ export default function Home() {
         onOpenAdmin={() => setAdminOpen(true)}
         organization={settings.organization}
         ministry={settings.ministry}
+        userName={user.fullName}
+        onLogout={() => {
+          logout();
+          toast.success("Signed out");
+        }}
       />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
@@ -166,20 +226,29 @@ export default function Home() {
               certificate={certificate}
               generating={generating}
               generated={Boolean(issued)}
+              paid={paid}
+              price={price}
+              onPay={() => setPayOpen(true)}
               onNameChange={setName}
               onCertificateChange={setCertificate}
               onGenerate={handleGenerate}
               onDownloadPdf={() => withSheet(downloadPdf)}
               onDownloadPng={() => withSheet(downloadPng)}
-              onPrint={printCertificate}
+              onPrint={handlePrint}
               onReset={reset}
             />
 
             {issued ? (
               <div className="animate-in fade-in zoom-in-95 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
-                <FiCheckCircle className="h-6 w-6 shrink-0 text-primary" />
+                {paid ? (
+                  <FiCheckCircle className="h-6 w-6 shrink-0 text-primary" />
+                ) : (
+                  <FiLock className="h-6 w-6 shrink-0 text-muted-foreground" />
+                )}
                 <div className="min-w-0 text-sm">
-                  <p className="font-medium">Certificate issued</p>
+                  <p className="font-medium">
+                    {paid ? "Certificate unlocked" : "Certificate issued — payment pending"}
+                  </p>
                   <p className="truncate text-muted-foreground">{issued.id}</p>
                 </div>
               </div>
@@ -208,7 +277,8 @@ export default function Home() {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">{c.name}</p>
                         <p className="truncate text-xs text-muted-foreground">
-                          {c.id} · {c.certificate}
+                          {c.id} · {c.certificate} ·{" "}
+                          {isPaid(payments, c.id) ? "Paid" : `KES ${priceFor(c.certificate)}`}
                         </p>
                       </div>
                       <Button
@@ -222,7 +292,7 @@ export default function Home() {
                           toast.success("Certificate loaded into preview");
                         }}
                       >
-                        <FiDownload className="h-4 w-4" />
+                        <FiEye className="h-4 w-4" />
                       </Button>
                     </li>
                   ))
@@ -232,9 +302,40 @@ export default function Home() {
           </div>
 
           <section className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
-            <h2 className="mb-4 text-lg font-semibold">Live Certificate Preview</h2>
-            <div className="overflow-hidden rounded-xl border border-border">
-              <CertificatePreview ref={sheetRef} data={preview} settings={settings} />
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-semibold">Live Certificate Preview</h2>
+              {issued && !paid ? (
+                <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                  Locked until payment
+                </span>
+              ) : null}
+            </div>
+            <div className="relative overflow-hidden rounded-xl border border-border">
+              <div
+                className={
+                  issued && !paid
+                    ? "pointer-events-none blur-md transition-[filter] duration-500 select-none"
+                    : "transition-[filter] duration-500"
+                }
+              >
+                <CertificatePreview ref={sheetRef} data={preview} settings={settings} />
+              </div>
+
+              {issued && !paid ? (
+                <div className="animate-in fade-in absolute inset-0 grid place-items-center bg-background/60 p-6 text-center backdrop-blur-[2px]">
+                  <div className="max-w-xs space-y-3">
+                    <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground">
+                      <FiLock className="h-5 w-5" />
+                    </span>
+                    <p className="font-semibold">Certificate locked</p>
+                    <p className="text-sm text-muted-foreground">
+                      Pay KES {priceFor(issued.certificate).toLocaleString()} via M-Pesa to reveal
+                      and download {issued.id}.
+                    </p>
+                    <Button onClick={() => setPayOpen(true)}>Pay with M-Pesa</Button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </section>
         </div>
@@ -254,6 +355,18 @@ export default function Home() {
         }}
         onImported={hydrate}
       />
+
+      {issued ? (
+        <PaymentModal
+          open={payOpen}
+          onOpenChange={setPayOpen}
+          certificateId={issued.id}
+          certificateTitle={issued.certificate}
+          amount={priceFor(issued.certificate)}
+          defaultPhone={user.phone}
+          onPaid={handlePaid}
+        />
+      ) : null}
     </div>
   );
 }
