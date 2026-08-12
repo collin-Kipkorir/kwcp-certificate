@@ -1,5 +1,8 @@
 import type { AdminSettings } from "@/types/Certificate";
 
+export const APP_NAME = "KWCP";
+export const APP_FULL_NAME = "Kenya Workers Certification Portal";
+
 export const CERTIFICATE_TYPES = [
   "Food Handler Certificate",
   "Public Health and Hygiene",
@@ -8,6 +11,27 @@ export const CERTIFICATE_TYPES = [
   "Customer Service",
   "Occupational Safety",
   "Basic First Aid",
+];
+
+/** Price in KES per certificate title. */
+export const CERTIFICATE_PRICES: Record<string, number> = {
+  "Food Handler Certificate": 1500,
+  "Public Health and Hygiene": 1200,
+  "Work Ethics Certificate": 800,
+  "Fire Safety Training": 2000,
+  "Customer Service": 900,
+  "Occupational Safety": 1800,
+  "Basic First Aid": 1000,
+};
+
+export const priceFor = (certificate: string) => CERTIFICATE_PRICES[certificate] ?? 1000;
+
+export const COUNTIES = [
+  "Nairobi","Mombasa","Kisumu","Nakuru","Uasin Gishu","Kiambu","Machakos","Kajiado","Nyeri","Meru",
+  "Kakamega","Bungoma","Trans Nzoia","Kericho","Bomet","Kilifi","Kwale","Taita Taveta","Garissa",
+  "Mandera","Wajir","Marsabit","Isiolo","Turkana","West Pokot","Samburu","Baringo","Laikipia",
+  "Elgeyo Marakwet","Nandi","Vihiga","Busia","Siaya","Homa Bay","Migori","Kisii","Nyamira","Narok",
+  "Tharaka Nithi","Embu","Kitui","Makueni","Muranga","Kirinyaga","Nyandarua","Lamu","Tana River",
 ];
 
 export const ADMIN_PASSWORD = "admin123";
@@ -27,4 +51,7 @@ export const STORAGE_KEYS = {
   certificates: "generatedCertificates",
   draft: "applicantDraft",
   theme: "portalTheme",
+  users: "kwcpUsers",
+  session: "kwcpSession",
+  payments: "kwcpPayments",
 } as const;
