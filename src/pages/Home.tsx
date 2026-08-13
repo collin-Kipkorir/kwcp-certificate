@@ -178,6 +178,18 @@ export default function Home() {
     savePayment(record);
     setPayments(loadPayments());
     toast.success(`Payment confirmed · Receipt ${receipt}`);
+
+    // Auto-download the unlocked certificate as A4 landscape PDF.
+    window.setTimeout(async () => {
+      if (!sheetRef.current) return;
+      const t = toast.loading("Downloading your certificate…");
+      try {
+        await downloadPdf(sheetRef.current, `${issued.id}-${issued.name.replace(/\s+/g, "-")}`);
+        toast.success("Certificate downloaded", { id: t });
+      } catch {
+        toast.error("Could not create the file", { id: t });
+      }
+    }, 600);
   };
 
   const reset = () => {
@@ -218,8 +230,8 @@ export default function Home() {
         }}
       />
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
-        <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 sm:py-8">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
           <div className="space-y-6">
             <CertificateForm
               name={name}
@@ -301,12 +313,12 @@ export default function Home() {
             </section>
           </div>
 
-          <section className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
+          <section className="min-w-0 rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-lg font-semibold">Live Certificate Preview</h2>
               {issued && !paid ? (
                 <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                  Locked until payment
+                  Hidden until payment
                 </span>
               ) : null}
             </div>
@@ -314,25 +326,28 @@ export default function Home() {
               <div
                 className={
                   issued && !paid
-                    ? "pointer-events-none blur-md transition-[filter] duration-500 select-none"
+                    ? "pointer-events-none invisible opacity-0 select-none"
                     : "transition-[filter] duration-500"
                 }
+                aria-hidden={issued && !paid ? true : undefined}
               >
                 <CertificatePreview ref={sheetRef} data={preview} settings={settings} />
               </div>
 
               {issued && !paid ? (
-                <div className="animate-in fade-in absolute inset-0 grid place-items-center bg-background/60 p-6 text-center backdrop-blur-[2px]">
+                <div className="animate-in fade-in absolute inset-0 grid place-items-center bg-card p-4 text-center sm:p-6">
                   <div className="max-w-xs space-y-3">
                     <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground">
                       <FiLock className="h-5 w-5" />
                     </span>
-                    <p className="font-semibold">Certificate locked</p>
+                    <p className="font-semibold">Certificate hidden</p>
                     <p className="text-sm text-muted-foreground">
-                      Pay KES {priceFor(issued.certificate).toLocaleString()} via M-Pesa to reveal
-                      and download {issued.id}.
+                      Pay KES {priceFor(issued.certificate).toLocaleString()} via M-Pesa to reveal{" "}
+                      {issued.id}. It downloads automatically once payment succeeds.
                     </p>
-                    <Button onClick={() => setPayOpen(true)}>Pay with M-Pesa</Button>
+                    <Button className="w-full sm:w-auto" onClick={() => setPayOpen(true)}>
+                      Pay with M-Pesa
+                    </Button>
                   </div>
                 </div>
               ) : null}
