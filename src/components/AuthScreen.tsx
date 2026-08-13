@@ -53,21 +53,22 @@ export function AuthScreen() {
   }
 
   return (
-    <div className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+    <div className="kenya-bg grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
       {/* Brand panel */}
-      <aside className="relative hidden flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
+      <aside className="relative hidden flex-col justify-between p-8 text-white xl:p-12 lg:flex">
+        <div className="kenya-stripe absolute inset-x-0 top-0 h-1.5" />
         <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary-foreground/15">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-white/20 bg-white/10">
             <FiAward className="h-6 w-6" />
           </span>
-          <div>
+          <div className="min-w-0">
             <p className="text-xl font-bold tracking-tight">{APP_NAME}</p>
-            <p className="text-sm opacity-80">{APP_FULL_NAME}</p>
+            <p className="truncate text-sm opacity-80">{APP_FULL_NAME}</p>
           </div>
         </div>
 
-        <div className="max-w-md space-y-6">
-          <h2 className="text-4xl leading-tight font-bold">
+        <div className="max-w-md space-y-6 py-10">
+          <h2 className="text-3xl leading-tight font-bold xl:text-4xl">
             Certified workers. Verified certificates.
           </h2>
           <ul className="space-y-4 text-sm opacity-90">
@@ -90,19 +91,19 @@ export function AuthScreen() {
       </aside>
 
       {/* Form panel */}
-      <main className="flex items-center justify-center px-4 py-12 sm:px-8">
+      <main className="flex items-center justify-center px-4 py-8 sm:px-8 sm:py-12">
         <div className="animate-in fade-in slide-in-from-bottom-3 w-full max-w-xl">
-          <div className="mb-6 flex items-center gap-3 lg:hidden">
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-primary-foreground">
+          <div className="mb-6 flex items-center gap-3 text-white lg:hidden">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/20 bg-white/10">
               <FiAward className="h-5 w-5" />
             </span>
-            <div>
+            <div className="min-w-0">
               <p className="text-lg font-bold">{APP_NAME}</p>
-              <p className="text-xs text-muted-foreground">{APP_FULL_NAME}</p>
+              <p className="truncate text-xs opacity-80">{APP_FULL_NAME}</p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-xl sm:p-8">
             <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
               {(["register", "login"] as Mode[]).map((m) => (
                 <button
