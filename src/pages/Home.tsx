@@ -323,13 +323,28 @@ export default function Home() {
               ) : null}
             </div>
             <div className="relative overflow-hidden rounded-xl border border-border">
+              {/*
+                The preview follows a three-state visual rule:
+                - No data entered: invisible but still occupies layout (opacity 0)
+                - Form data entered but not yet issued: blurred (teaser)
+                - Issued and paid: fully visible
+                - Issued but unpaid: invisible behind the lock overlay
+              */}
               <div
-                className={
-                  issued && !paid
-                    ? "pointer-events-none invisible opacity-0 select-none"
-                    : "transition-[filter] duration-500"
-                }
-                aria-hidden={issued && !paid ? true : undefined}
+                className={(() => {
+                  const hasInput = Boolean(name.trim() || certificate);
+                  const isLocked = Boolean(issued && !paid);
+                  let classes = "transition-[filter,opacity] duration-300";
+                  if (isLocked) {
+                    classes += " pointer-events-none select-none opacity-0";
+                  } else if (hasInput) {
+                    classes += " pointer-events-none select-none blur-md";
+                  } else {
+                    classes += " opacity-0";
+                  }
+                  return classes;
+                })()}
+                aria-hidden={Boolean(issued && !paid) || !name.trim() && !certificate ? true : undefined}
               >
                 <CertificatePreview ref={sheetRef} data={preview} settings={settings} />
               </div>
