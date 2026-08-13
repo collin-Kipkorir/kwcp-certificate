@@ -186,6 +186,31 @@
   background: #111111;
 }
 
+/* ── Kenya certification themed backdrop (auth / landing) ──────────── */
+.kenya-bg {
+  background-color: #0b1220;
+  background-image:
+    radial-gradient(1100px 520px at 12% -10%, rgba(0, 106, 78, 0.55), transparent 60%),
+    radial-gradient(900px 480px at 105% 8%, rgba(190, 30, 45, 0.45), transparent 62%),
+    radial-gradient(700px 700px at 50% 120%, rgba(0, 0, 0, 0.75), transparent 70%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 2px,
+      transparent 2px,
+      transparent 16px
+    );
+}
+.kenya-stripe {
+  background: linear-gradient(
+    90deg,
+    #111111 0 25%,
+    #be1e2d 25% 50%,
+    #ffffff 50% 62%,
+    #006a4e 62% 100%
+  );
+}
+
 @media print {
   html,
   body {
