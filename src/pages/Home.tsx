@@ -335,27 +335,25 @@ export default function Home() {
                   const hasInput = Boolean(name.trim() || certificate);
                   const isLocked = Boolean(issued && !paid);
                   let classes = "transition-[filter,opacity] duration-300";
-                  if (isLocked) {
-                    classes += " pointer-events-none select-none opacity-0";
-                  } else if (hasInput) {
+                  if (isLocked || hasInput) {
                     classes += " pointer-events-none select-none blur-md";
                   } else {
                     classes += " opacity-0";
                   }
                   return classes;
                 })()}
-                aria-hidden={Boolean(issued && !paid) || !name.trim() && !certificate ? true : undefined}
+                aria-hidden={Boolean(issued && !paid) || (!name.trim() && !certificate) ? true : undefined}
               >
                 <CertificatePreview ref={sheetRef} data={preview} settings={settings} />
               </div>
 
               {issued && !paid ? (
-                <div className="animate-in fade-in absolute inset-0 grid place-items-center bg-card p-4 text-center sm:p-6">
-                  <div className="max-w-xs space-y-3">
+                <div className="animate-in fade-in absolute inset-0 grid place-items-center bg-card/60 p-4 text-center backdrop-blur-sm sm:p-6">
+                  <div className="max-w-xs space-y-3 rounded-2xl border border-border bg-card p-6 shadow-lg">
                     <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground">
                       <FiLock className="h-5 w-5" />
                     </span>
-                    <p className="font-semibold">Certificate hidden</p>
+                    <p className="font-semibold">Certificate locked</p>
                     <p className="text-sm text-muted-foreground">
                       Pay KES {priceFor(issued.certificate).toLocaleString()} via M-Pesa to reveal{" "}
                       {issued.id}. It downloads automatically once payment succeeds.
