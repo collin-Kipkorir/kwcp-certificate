@@ -54,11 +54,18 @@ export function CertificateForm({
   onReset,
 }: Props) {
   return (
-    <section className="animate-in fade-in slide-in-from-bottom-2 rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
-      <h2 className="text-lg font-semibold">Applicant Details</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        The preview updates instantly as you type.
-      </p>
+    <section className="gov-card animate-in fade-in slide-in-from-bottom-2 rounded-2xl border border-border bg-card p-4 transition-shadow duration-300 sm:p-6">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
+          1
+        </span>
+        <div className="min-w-0">
+          <h2 className="truncate text-base font-semibold sm:text-lg">Applicant Details</h2>
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            The preview updates instantly as you type.
+          </p>
+        </div>
+      </div>
 
       <div className="mt-6 space-y-5">
         <div className="space-y-2">

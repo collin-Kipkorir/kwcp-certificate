@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { FiCheckCircle, FiEye, FiLock, FiSearch } from "react-icons/fi";
+import { FiCheckCircle, FiEye, FiLock, FiSearch, FiShield } from "react-icons/fi";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CertificateForm } from "@/components/CertificateForm";
