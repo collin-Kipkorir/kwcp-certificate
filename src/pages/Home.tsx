@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { FiCheckCircle, FiEye, FiLock, FiSearch } from "react-icons/fi";
+import { FiCheckCircle, FiEye, FiLock, FiSearch, FiShield } from "react-icons/fi";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CertificateForm } from "@/components/CertificateForm";
@@ -254,6 +254,41 @@ export default function Home() {
         }}
       />
 
+      <section className="gov-band border-b border-border">
+        <div className="mx-auto grid w-full max-w-7xl gap-5 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-center">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-semibold tracking-wide text-primary uppercase">
+              <FiShield className="h-3.5 w-3.5" /> Government-style verified issuance
+            </span>
+            <h2 className="mt-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
+              Generate your official worker certificate
+            </h2>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
+              Fill in your details, pay securely with M-Pesa, and download a print-ready A4
+              landscape certificate with a unique number and QR verification code.
+            </p>
+          </div>
+          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2">
+            {[
+              { label: "Certificates issued", value: certificates.length.toString() },
+              { label: "Verified by QR", value: "100%" },
+              { label: "Delivery", value: "Instant" },
+              { label: "Payment", value: "M-Pesa" },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="gov-card rounded-xl border border-border bg-card px-4 py-3"
+              >
+                <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                  {s.label}
+                </dt>
+                <dd className="mt-0.5 truncate text-lg font-bold sm:text-xl">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
       <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 sm:py-8">
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
           <div className="space-y-6">
@@ -290,8 +325,8 @@ export default function Home() {
               </div>
             ) : null}
 
-            <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="text-lg font-semibold">Recent Certificates</h2>
+            <section className="gov-card rounded-2xl border border-border bg-card p-4 sm:p-6">
+              <h2 className="text-base font-semibold sm:text-lg">Recent Certificates</h2>
               <div className="relative mt-3">
                 <FiSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -337,9 +372,11 @@ export default function Home() {
             </section>
           </div>
 
-          <section className="min-w-0 rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-6">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-semibold">Live Certificate Preview</h2>
+          <section className="gov-card min-w-0 rounded-2xl border border-border bg-card p-3 sm:p-6">
+            <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-between">
+              <h2 className="truncate text-base font-semibold sm:text-lg">
+                Live Certificate Preview
+              </h2>
               {issued && !paid ? (
                 <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                   Hidden until payment

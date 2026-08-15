@@ -67,25 +67,25 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.975 0.006 247);
-  --foreground: oklch(0.21 0.035 258);
+  --background: oklch(0.977 0.006 150);
+  --foreground: oklch(0.22 0.02 170);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.035 258);
+  --card-foreground: oklch(0.22 0.02 170);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.035 258);
-  --primary: oklch(0.49 0.16 258);
+  --popover-foreground: oklch(0.22 0.02 170);
+  --primary: oklch(0.46 0.11 163);
   --primary-foreground: oklch(0.99 0.005 250);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.962 0.01 160);
+  --secondary-foreground: oklch(0.24 0.03 168);
+  --muted: oklch(0.962 0.008 160);
+  --muted-foreground: oklch(0.52 0.02 170);
+  --accent: oklch(0.955 0.018 158);
+  --accent-foreground: oklch(0.28 0.05 165);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.918 0.012 160);
+  --input: oklch(0.918 0.012 160);
+  --ring: oklch(0.46 0.11 163);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -102,19 +102,19 @@
 }
 
 .dark {
-  --background: oklch(0.17 0.028 260);
+  --background: oklch(0.17 0.022 170);
   --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.23 0.032 262);
+  --card: oklch(0.225 0.025 172);
   --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
+  --popover: oklch(0.225 0.025 172);
   --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.62 0.16 256);
+  --primary: oklch(0.66 0.13 163);
   --primary-foreground: oklch(0.99 0.005 250);
-  --secondary: oklch(0.279 0.041 260.031);
+  --secondary: oklch(0.28 0.03 170);
   --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
+  --muted: oklch(0.28 0.03 170);
+  --muted-foreground: oklch(0.72 0.02 170);
+  --accent: oklch(0.3 0.04 168);
   --accent-foreground: oklch(0.984 0.003 247.858);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
@@ -209,6 +209,27 @@
     #ffffff 50% 62%,
     #006a4e 62% 100%
   );
+}
+
+/* ── Official portal chrome ────────────────────────────────────────── */
+.gov-band {
+  background:
+    radial-gradient(900px 300px at 8% -40%, rgba(0, 106, 78, 0.16), transparent 65%),
+    radial-gradient(700px 280px at 95% -60%, rgba(190, 30, 45, 0.12), transparent 65%);
+}
+.gov-guilloche {
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 7%, transparent) 0px,
+    color-mix(in oklab, var(--primary) 7%, transparent) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+}
+.gov-card {
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--foreground) 6%, transparent),
+    0 12px 32px -18px color-mix(in oklab, var(--primary) 45%, transparent);
 }
 
 @media print {
