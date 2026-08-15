@@ -45,6 +45,30 @@ export default function Home() {
   const [payOpen, setPayOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [query, setQuery] = useState("");
+  const adminTapsRef = useRef<{ count: number; last: number }>({ count: 0, last: 0 });
+
+  // Secret admin access: Ctrl/Cmd + Shift + A, or 5 quick taps on the brand mark.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        setAdminOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const handleSecretAdminTrigger = () => {
+    const now = Date.now();
+    const state = adminTapsRef.current;
+    state.count = now - state.last < 700 ? state.count + 1 : 1;
+    state.last = now;
+    if (state.count >= 5) {
+      state.count = 0;
+      setAdminOpen(true);
+    }
+  };
 
   const hydrate = () => {
     setSettings(loadAdminSettings());
@@ -220,7 +244,7 @@ export default function Home() {
       <Header
         theme={theme}
         onToggleTheme={toggleTheme}
-        onOpenAdmin={() => setAdminOpen(true)}
+        onSecretAdminTrigger={handleSecretAdminTrigger}
         organization={settings.organization}
         ministry={settings.ministry}
         userName={user.fullName}
