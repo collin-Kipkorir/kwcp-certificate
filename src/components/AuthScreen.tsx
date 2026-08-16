@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { FiAward, FiLoader, FiShield, FiSmartphone, FiCheckCircle } from "react-icons/fi";
+import { FiLoader, FiShield, FiSmartphone, FiCheckCircle } from "react-icons/fi";
+import coatOfArms from "@/assets/coat-of-arms.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,8 +59,8 @@ export function AuthScreen() {
       <aside className="relative hidden flex-col justify-between p-8 text-white xl:p-12 lg:flex">
         <div className="kenya-stripe absolute inset-x-0 top-0 h-1.5" />
         <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-white/20 bg-white/10">
-            <FiAward className="h-6 w-6" />
+          <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/20 bg-white/10">
+            <img src={coatOfArms} alt="Kenya coat of arms" className="h-9 w-9 object-contain" />
           </span>
           <div className="min-w-0">
             <p className="text-xl font-bold tracking-tight">{APP_NAME}</p>
@@ -94,8 +95,8 @@ export function AuthScreen() {
       <main className="flex items-center justify-center px-4 py-8 sm:px-8 sm:py-12">
         <div className="animate-in fade-in slide-in-from-bottom-3 w-full max-w-xl">
           <div className="mb-6 flex items-center gap-3 text-white lg:hidden">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/20 bg-white/10">
-              <FiAward className="h-5 w-5" />
+            <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/20 bg-white/10">
+              <img src={coatOfArms} alt="Kenya coat of arms" className="h-8 w-8 object-contain" />
             </span>
             <div className="min-w-0">
               <p className="text-lg font-bold">{APP_NAME}</p>

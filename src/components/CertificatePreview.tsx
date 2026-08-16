@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import sealImg from "@/assets/seal.png";
+import coatOfArms from "@/assets/coat-of-arms.png";
 import { QRCodeGenerator } from "./QRCodeGenerator";
 import { buildQrPayload } from "@/utils/certificate";
 import type { AdminSettings } from "@/types/Certificate";
@@ -25,14 +26,14 @@ const Sheet = forwardRef<HTMLDivElement, Props>(function Sheet({ data, settings 
       <div className="cert-frame-red" />
       <div className="cert-frame-black" />
       <div className="cert-frame-thin" />
-      <img src={settings.watermark || sealImg} alt="" className="cert-watermark" />
+      <img src={settings.watermark || coatOfArms} alt="" className="cert-watermark" />
 
       <div className="absolute inset-[54px] flex flex-col items-center px-[60px] pt-[10px] text-center">
-        {settings.logo ? (
-          <img src={settings.logo} alt="Organization logo" className="h-[74px] object-contain" />
-        ) : (
-          <img src={sealImg} alt="Organization logo" className="h-[74px] object-contain" />
-        )}
+        <img
+          src={settings.logo || coatOfArms}
+          alt="Organization logo"
+          className="h-[74px] object-contain"
+        />
 
         <p className="mt-[6px] text-[34px] leading-tight tracking-[0.06em] uppercase">
           {settings.organization}
