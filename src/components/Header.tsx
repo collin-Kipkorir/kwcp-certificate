@@ -1,4 +1,5 @@
-import { FiMoon, FiSun, FiAward, FiLogOut } from "react-icons/fi";
+import { FiMoon, FiSun, FiLogOut } from "react-icons/fi";
+import coatOfArms from "@/assets/coat-of-arms.png";
 import { Button } from "@/components/ui/button";
 import { APP_FULL_NAME, APP_NAME } from "@/utils/constants";
 
@@ -35,10 +36,14 @@ export function Header({
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 sm:gap-4 sm:px-6 sm:py-4">
         <div className="flex min-w-0 items-center gap-3">
           <span
-            className="grid h-10 w-10 shrink-0 cursor-default place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm select-none sm:h-11 sm:w-11"
+            className="grid h-10 w-10 shrink-0 cursor-default place-items-center overflow-hidden rounded-xl bg-primary/10 shadow-sm select-none sm:h-11 sm:w-11"
             onClick={onSecretAdminTrigger}
           >
-            <FiAward className="h-5 w-5" />
+            <img
+              src={coatOfArms}
+              alt="Kenya coat of arms"
+              className="h-8 w-8 object-contain sm:h-9 sm:w-9"
+            />
           </span>
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-2">
