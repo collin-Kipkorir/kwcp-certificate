@@ -7,13 +7,29 @@
       "config": { "distDir": "dist" }
     },
     {
-      "src": "api/**/*.ts",
+      "src": "api/stk-push.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/transactions/[txId].ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    { "handle": "filesystem" },
-    { "src": "/api/.*", "dest": "/api/$1", "continue": true },
-    { "src": "/.*", "dest": "/index.html" }
+    {
+      "src": "/api/stk-push",
+      "dest": "/api/stk-push.ts"
+    },
+    {
+      "src": "/api/transactions/(?<txId>.*)",
+      "dest": "/api/transactions/[txId].ts?txId=$txId"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
