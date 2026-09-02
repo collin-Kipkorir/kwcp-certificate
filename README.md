@@ -396,7 +396,9 @@ The final application should look like a professional government certificate gen
 
  All settings and generated records persist in Local Storage.
 
- Users can instantly preview, generate, print, and download certificates without needing a server or database.
+Users can instantly preview, generate, print, and download certificates without needing a server or database.
+
+<!-- redeploy-trigger: no-op change -->
 
 Default Signature Image
 
