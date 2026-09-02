@@ -23,6 +23,9 @@ import {
   loadPayments,
   savePayment,
   saveAdminSettings,
+  loadCertificateCatalog,
+  saveCertificateCatalog,
+  deleteCertificateCatalogItem,
 } from "@/utils/certificateDb";
 import {
   loadDraft,
@@ -30,8 +33,13 @@ import {
   loadTheme,
   saveTheme,
 } from "@/utils/localStorage";
-import { DEFAULT_ADMIN_SETTINGS, priceFor } from "@/utils/constants";
-import type { AdminSettings, GeneratedCertificate, PaymentRecord } from "@/types/Certificate";
+import { DEFAULT_ADMIN_SETTINGS, DEFAULT_CERTIFICATE_CATALOG } from "@/utils/constants";
+import type {
+  AdminSettings,
+  CertificateCatalogItem,
+  GeneratedCertificate,
+  PaymentRecord,
+} from "@/types/Certificate";
 
 export default function Home() {
   const { user, ready, logout } = useAuth();
@@ -41,6 +49,7 @@ export default function Home() {
   const [counter, setCounter] = useState(1);
   const [certificates, setCertificates] = useState<GeneratedCertificate[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [catalog, setCatalog] = useState<CertificateCatalogItem[]>(DEFAULT_CERTIFICATE_CATALOG as CertificateCatalogItem[]);
   const [name, setName] = useState("");
   const [certificate, setCertificate] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -76,16 +85,18 @@ export default function Home() {
 
   const hydrate = async () => {
     try {
-      const [s, cnt, certs, pays] = await Promise.all([
+      const [s, cnt, certs, pays, certCatalog] = await Promise.all([
         loadAdminSettings(),
         loadCertificateCounter(),
         loadCertificates(),
         loadPayments(),
+        loadCertificateCatalog(),
       ]);
       setSettings(s);
       setCounter(cnt);
       setCertificates(certs);
       setPayments(pays);
+      setCatalog(certCatalog);
     } catch (err) {
       console.error("Failed to hydrate from Firebase:", err);
       toast.error("Failed to load data from server");
@@ -121,7 +132,8 @@ export default function Home() {
   };
 
   const paid = Boolean(issued && isPaid(payments, issued.id));
-  const price = priceFor(certificate || preview.certificate);
+  const selectedCatalogItem = catalog.find((item) => item.title === (certificate || preview.certificate));
+  const price = selectedCatalogItem?.price ?? 1000;
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -137,6 +149,27 @@ export default function Home() {
     } catch (err) {
       console.error("Failed to save admin settings:", err);
       toast.error("Failed to save settings to server");
+    }
+  };
+
+  const updateCatalog = async (nextCatalog: CertificateCatalogItem[]) => {
+    const sanitized = nextCatalog
+      .filter((item) => item.title.trim())
+      .map((item) => ({
+        ...item,
+        title: item.title.trim(),
+        price: Number(item.price) || 0,
+        active: Boolean(item.active),
+      }))
+      .filter((item) => item.price > 0);
+
+    setCatalog(sanitized);
+    try {
+      await saveCertificateCatalog(sanitized);
+      toast.success("Certificate catalog updated");
+    } catch (err) {
+      console.error("Failed to save certificate catalog:", err);
+      toast.error("Failed to save certificate catalog to server");
     }
   };
 
@@ -220,7 +253,7 @@ export default function Home() {
     const record: PaymentRecord = {
       certificateId: issued.id,
       userId: user.id,
-      amount: priceFor(issued.certificate),
+      amount: catalog.find((item) => item.title === issued.certificate)?.price ?? 1000,
       phone,
       receipt,
       paidAt: new Date().toISOString(),
@@ -331,6 +364,7 @@ export default function Home() {
               generated={Boolean(issued)}
               paid={paid}
               price={price}
+              catalog={catalog}
               onPay={() => setPayOpen(true)}
               onNameChange={setName}
               onCertificateChange={setCertificate}
@@ -381,7 +415,7 @@ export default function Home() {
                         <p className="truncate text-sm font-medium">{c.name}</p>
                         <p className="truncate text-xs text-muted-foreground">
                           {c.id} · {c.certificate} ·{" "}
-                          {isPaid(payments, c.id) ? "Paid" : `KES ${priceFor(c.certificate)}`}
+                          {isPaid(payments, c.id) ? "Paid" : `KES ${catalog.find((item) => item.title === c.certificate)?.price ?? 1000}`}
                         </p>
                       </div>
                       <Button
@@ -451,7 +485,7 @@ export default function Home() {
                     </span>
                     <p className="font-semibold">Certificate locked</p>
                     <p className="text-sm text-muted-foreground">
-                      Pay KES {priceFor(issued.certificate).toLocaleString()} via M-Pesa to reveal{" "}
+                      Pay KES {catalog.find((item) => item.title === issued.certificate)?.price.toLocaleString() ?? "1000"} via M-Pesa to reveal{" "}
                       {issued.id}. It downloads automatically once payment succeeds.
                     </p>
                     <Button className="w-full sm:w-auto" onClick={() => setPayOpen(true)}>
@@ -471,7 +505,9 @@ export default function Home() {
         open={adminOpen}
         onOpenChange={setAdminOpen}
         settings={settings}
+        catalog={catalog}
         onSave={updateSettings}
+        onCatalogChange={updateCatalog}
         onResetCounter={() => {
           setCounter(1);
           saveCertificateCounter(1);
@@ -486,7 +522,7 @@ export default function Home() {
           onOpenChange={setPayOpen}
           certificateId={issued.id}
           certificateTitle={issued.certificate}
-          amount={priceFor(issued.certificate)}
+          amount={catalog.find((item) => item.title === issued.certificate)?.price ?? 1000}
           defaultPhone={user.phone}
           onPaid={handlePaid}
         />

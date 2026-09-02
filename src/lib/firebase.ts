@@ -164,6 +164,51 @@ export async function saveAdminSettingsToDb(settings: Record<string, unknown>) {
   }
 }
 
+// Certificate catalog functions
+export async function saveCertificateCatalogToDb(items: Record<string, unknown>[]) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
+  try {
+    const updates: Record<string, unknown> = {};
+    for (const item of items) {
+      const id = String(item["id"] ?? sanitizeKey(String(item["title"] ?? "")));
+      updates[`certificate_catalog/${id}`] = item;
+    }
+    await update(ref(db), updates);
+  } catch (err) {
+    throw new Error(`Firebase certificate catalog save failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
+export async function loadCertificateCatalogFromDb() {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
+  try {
+    const snap = await get(ref(db, "certificate_catalog"));
+    if (!snap.exists()) return [];
+    const data = snap.val() as Record<string, Record<string, unknown>>;
+    return Object.values(data)
+      .filter((item) => item && typeof item === "object")
+      .sort((a, b) => {
+        const aTime = new Date((a["createdAt"] as string) ?? "1970-01-01").getTime();
+        const bTime = new Date((b["createdAt"] as string) ?? "1970-01-01").getTime();
+        return bTime - aTime;
+      });
+  } catch (err) {
+    throw new Error(`Firebase certificate catalog load failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
+export async function deleteCertificateCatalogItemFromDb(id: string) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
+  try {
+    await set(ref(db, `certificate_catalog/${id}`), null);
+  } catch (err) {
+    throw new Error(`Firebase certificate catalog deletion failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
 // Certificate counter functions
 export async function loadCertificateCounterFromDb(): Promise<number> {
   ensureInitialized();

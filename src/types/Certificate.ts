@@ -10,6 +10,14 @@ export interface AdminSettings {
   paylorChannelId?: string;
 }
 
+export interface CertificateCatalogItem {
+  id: string;
+  title: string;
+  price: number;
+  active: boolean;
+  createdAt: string;
+}
+
 export interface GeneratedCertificate {
   id: string;
   name: string;

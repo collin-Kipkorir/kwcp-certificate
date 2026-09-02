@@ -3,28 +3,29 @@ import sign from "@/assets/sign.png";
 export const APP_NAME = "KWCP";
 export const APP_FULL_NAME = "Kenya Workers Certification Portal";
 
-export const CERTIFICATE_TYPES = [
-  "Food Handler Certificate",
-  "Public Health and Hygiene",
-  "Work Ethics Certificate",
-  "Fire Safety Training",
-  "Customer Service",
-  "Occupational Safety",
-  "Basic First Aid",
-];
+export const DEFAULT_CERTIFICATE_CATALOG = [
+  { id: "food-handler", title: "Food Handler Certificate", price: 1500, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
+  { id: "public-health", title: "Public Health and Hygiene", price: 1200, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
+  { id: "work-ethics", title: "Work Ethics Certificate", price: 800, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
+  { id: "fire-safety", title: "Fire Safety Training", price: 2000, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
+  { id: "customer-service", title: "Customer Service", price: 900, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
+  { id: "occupational-safety", title: "Occupational Safety", price: 1800, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
+  { id: "first-aid", title: "Basic First Aid", price: 1000, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
+] as const;
 
-/** Price in KES per certificate title. */
-export const CERTIFICATE_PRICES: Record<string, number> = {
-  "Food Handler Certificate": 1500,
-  "Public Health and Hygiene": 1200,
-  "Work Ethics Certificate": 800,
-  "Fire Safety Training": 2000,
-  "Customer Service": 900,
-  "Occupational Safety": 1800,
-  "Basic First Aid": 1000,
+export const CERTIFICATE_TYPES = DEFAULT_CERTIFICATE_CATALOG.filter((item) => item.active).map((item) => item.title);
+
+export const CERTIFICATE_PRICES: Record<string, number> = Object.fromEntries(
+  DEFAULT_CERTIFICATE_CATALOG.map((item) => [item.title, item.price]),
+) as Record<string, number>;
+
+export const priceFor = (
+  certificate: string,
+  catalog: Array<{ title: string; price: number }> = DEFAULT_CERTIFICATE_CATALOG,
+) => {
+  const match = catalog.find((item) => item.title === certificate);
+  return match?.price ?? CERTIFICATE_PRICES[certificate] ?? 1000;
 };
-
-export const priceFor = (certificate: string) => CERTIFICATE_PRICES[certificate] ?? 1000;
 
 export const COUNTIES = [
   "Nairobi","Mombasa","Kisumu","Nakuru","Uasin Gishu","Kiambu","Machakos","Kajiado","Nyeri","Meru",

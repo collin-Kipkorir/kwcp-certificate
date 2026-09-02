@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CERTIFICATE_TYPES, priceFor } from "@/utils/constants";
+import type { CertificateCatalogItem } from "@/types/Certificate";
 
 interface Props {
   name: string;
@@ -27,6 +27,7 @@ interface Props {
   generated: boolean;
   paid: boolean;
   price: number;
+  catalog: CertificateCatalogItem[];
   onPay: () => void;
   onNameChange: (v: string) => void;
   onCertificateChange: (v: string) => void;
@@ -44,6 +45,7 @@ export function CertificateForm({
   generated,
   paid,
   price,
+  catalog,
   onPay,
   onNameChange,
   onCertificateChange,
@@ -86,9 +88,9 @@ export function CertificateForm({
               <SelectValue placeholder="Select a certificate" />
             </SelectTrigger>
             <SelectContent>
-              {CERTIFICATE_TYPES.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {t} — KES {priceFor(t).toLocaleString()}
+              {catalog.filter((item) => item.active).map((item) => (
+                <SelectItem key={item.id} value={item.title}>
+                  {item.title} — KES {item.price.toLocaleString()}
                 </SelectItem>
               ))}
             </SelectContent>

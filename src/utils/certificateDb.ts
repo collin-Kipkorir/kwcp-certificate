@@ -1,4 +1,4 @@
-import type { GeneratedCertificate, PaymentRecord } from "@/types/Certificate";
+import type { CertificateCatalogItem, GeneratedCertificate, PaymentRecord } from "@/types/Certificate";
 import {
   saveCertificateToDb,
   loadCertificatesFromDb,
@@ -8,8 +8,11 @@ import {
   loadPaymentsFromDb,
   saveAdminSettingsToDb,
   loadAdminSettingsFromDb,
+  saveCertificateCatalogToDb,
+  loadCertificateCatalogFromDb,
+  deleteCertificateCatalogItemFromDb,
 } from "@/lib/firebase";
-import { DEFAULT_ADMIN_SETTINGS } from "./constants";
+import { DEFAULT_ADMIN_SETTINGS, DEFAULT_CERTIFICATE_CATALOG } from "./constants";
 import type { AdminSettings } from "@/types/Certificate";
 
 // Keep local copies for fast access during app runtime
@@ -17,6 +20,7 @@ let certificateCache: GeneratedCertificate[] | null = null;
 let paymentCache: PaymentRecord[] | null = null;
 let adminSettingsCache: AdminSettings | null = null;
 let certificateCounterCache: number | null = null;
+let certificateCatalogCache: CertificateCatalogItem[] | null = null;
 
 /**
  * Load certificates from Firebase (with local cache)
@@ -137,6 +141,50 @@ export async function savePayment(payment: PaymentRecord): Promise<void> {
 }
 
 /**
+ * Load certificate catalog from Firebase (with local cache and defaults)
+ */
+export async function loadCertificateCatalog(): Promise<CertificateCatalogItem[]> {
+  if (certificateCatalogCache !== null) {
+    return certificateCatalogCache;
+  }
+
+  try {
+    const items = await loadCertificateCatalogFromDb();
+    if (items && items.length) {
+      certificateCatalogCache = items as CertificateCatalogItem[];
+      return certificateCatalogCache;
+    }
+  } catch (err) {
+    console.warn("Failed to load certificate catalog from Firebase:", err);
+  }
+
+  certificateCatalogCache = [...DEFAULT_CERTIFICATE_CATALOG] as CertificateCatalogItem[];
+  return certificateCatalogCache;
+}
+
+export async function saveCertificateCatalog(items: CertificateCatalogItem[]): Promise<void> {
+  try {
+    await saveCertificateCatalogToDb(items as unknown as Record<string, unknown>[]);
+    certificateCatalogCache = items;
+  } catch (err) {
+    console.error("Failed to save certificate catalog to Firebase:", err);
+    throw err;
+  }
+}
+
+export async function deleteCertificateCatalogItem(id: string): Promise<void> {
+  try {
+    await deleteCertificateCatalogItemFromDb(id);
+    if (certificateCatalogCache) {
+      certificateCatalogCache = certificateCatalogCache.filter((item) => item.id !== id);
+    }
+  } catch (err) {
+    console.error("Failed to delete certificate catalog item:", err);
+    throw err;
+  }
+}
+
+/**
  * Load admin settings from Firebase (with local cache and defaults)
  */
 export async function loadAdminSettings(): Promise<AdminSettings> {
@@ -179,4 +227,5 @@ export function clearCaches(): void {
   paymentCache = null;
   adminSettingsCache = null;
   certificateCounterCache = null;
+  certificateCatalogCache = null;
 }

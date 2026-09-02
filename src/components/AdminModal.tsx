@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { FiDownload, FiUpload, FiRefreshCw } from "react-icons/fi";
+import { FiDownload, FiUpload, FiRefreshCw, FiTrash2, FiPlus } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,13 +13,15 @@ import {
 } from "@/components/ui/dialog";
 import { loginAdminUser, logoutAdminUser, type AdminUser } from "@/utils/adminAuth";
 import { exportStorage, importStorage } from "@/utils/localStorage";
-import type { AdminSettings } from "@/types/Certificate";
+import type { AdminSettings, CertificateCatalogItem } from "@/types/Certificate";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   settings: AdminSettings;
+  catalog: CertificateCatalogItem[];
   onSave: (s: AdminSettings) => void;
+  onCatalogChange: (items: CertificateCatalogItem[]) => void;
   onResetCounter: () => void;
   onImported: () => void;
 }
@@ -37,7 +39,9 @@ export function AdminModal({
   open,
   onOpenChange,
   settings,
+  catalog,
   onSave,
+  onCatalogChange,
   onResetCounter,
   onImported,
 }: Props) {
@@ -46,7 +50,58 @@ export function AdminModal({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newPrice, setNewPrice] = useState("1000");
   const importRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setNewTitle("");
+      setNewPrice("1000");
+    }
+  }, [open]);
+
+  const updateCatalogItem = (id: string, patch: Partial<CertificateCatalogItem>) => {
+    onCatalogChange(catalog.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+  };
+
+  const addCatalogItem = () => {
+    const title = newTitle.trim();
+    const price = Number(newPrice);
+    if (!title) {
+      toast.error("Certificate title is required");
+      return;
+    }
+    if (!Number.isFinite(price) || price <= 0) {
+      toast.error("Price must be a valid positive number");
+      return;
+    }
+    if (catalog.some((item) => item.title.toLowerCase() === title.toLowerCase())) {
+      toast.error("A certificate with that title already exists");
+      return;
+    }
+
+    const item: CertificateCatalogItem = {
+      id: `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
+      title,
+      price,
+      active: true,
+      createdAt: new Date().toISOString(),
+    };
+    onCatalogChange([...catalog, item]);
+    setNewTitle("");
+    setNewPrice("1000");
+    toast.success("Certificate added");
+  };
+
+  const removeCatalogItem = (id: string) => {
+    if (catalog.length <= 1) {
+      toast.error("At least one certificate must remain");
+      return;
+    }
+    onCatalogChange(catalog.filter((item) => item.id !== id));
+    toast.success("Certificate removed");
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -269,6 +324,64 @@ export function AdminModal({
                 maxLength={60}
                 onChange={(e) => onSave({ ...settings, ministry: e.target.value })}
               />
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-border p-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Certificate Catalog (add, edit, delete & prices)
+                </h3>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-[minmax(0,1.3fr)_120px_auto]">
+                <Input
+                  placeholder="Certificate title"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  min="1"
+                  step="100"
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                />
+                <Button type="button" onClick={addCatalogItem} className="w-full">
+                  <FiPlus className="mr-2 h-4 w-4" /> Add
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                {catalog.map((item) => (
+                  <div key={item.id} className="grid gap-2 rounded-md border border-border p-2 sm:grid-cols-[minmax(0,1.3fr)_120px_auto_auto]">
+                    <Input
+                      value={item.title}
+                      onChange={(e) => updateCatalogItem(item.id, { title: e.target.value })}
+                    />
+                    <Input
+                      type="number"
+                      min="1"
+                      step="100"
+                      value={item.price}
+                      onChange={(e) => updateCatalogItem(item.id, { price: Number(e.target.value) || 0 })}
+                    />
+                    <Button
+                      variant={item.active ? "default" : "secondary"}
+                      size="sm"
+                      onClick={() => updateCatalogItem(item.id, { active: !item.active })}
+                    >
+                      {item.active ? "Active" : "Inactive"}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeCatalogItem(item.id)}
+                    >
+                      <FiTrash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
