@@ -399,6 +399,7 @@ The final application should look like a professional government certificate gen
 Users can instantly preview, generate, print, and download certificates without needing a server or database.
 
 <!-- redeploy-trigger: no-op change -->
+<!-- redeploy-trigger: 2026-09-02T09:42:00Z -->
 
 Default Signature Image
 
