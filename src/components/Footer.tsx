@@ -21,7 +21,7 @@ export function Footer() {
         </div>
         <p className="flex items-center gap-2 text-xs text-muted-foreground">
           <FiShield className="h-4 w-4 shrink-0" />
-          Accounts, certificates and payments are stored on this device for the demo release.
+          Government-grade security and verification.
         </p>
       </div>
     </footer>
