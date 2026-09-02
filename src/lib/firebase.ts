@@ -22,16 +22,29 @@ const firebaseConfig = {
   measurementId: "G-T0RLR6KG2F",
 };
 
-const app = initializeApp(firebaseConfig);
-// Analytics may throw in some non-browser environments; guard it.
-try {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const analytics = getAnalytics(app);
-} catch {
-  /* ignore analytics errors */
-}
+let app: ReturnType<typeof initializeApp> | null = null;
+let db: ReturnType<typeof getDatabase> | null = null;
 
-const db = getDatabase(app);
+function ensureInitialized() {
+  if (db && app) return;
+  try {
+    app = initializeApp(firebaseConfig);
+    try {
+      // Analytics may throw in some non-browser environments; ignore errors
+      // but don't call it on import to avoid Installations requests on page load.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const analytics = getAnalytics(app);
+    } catch {
+      /* ignore analytics errors */
+    }
+    db = getDatabase(app);
+  } catch (err) {
+    // Leave db null if initialization fails (e.g., offline or blocked).
+    db = null;
+    app = null;
+    // Do not throw here; callers will handle missing `db` with clearer errors.
+  }
+}
 
 function sanitizeKey(s: string) {
   // Encode and escape characters not allowed in RTDB keys: . # $ [ ]
@@ -39,6 +52,8 @@ function sanitizeKey(s: string) {
 }
 
 export async function createUserInDb(user: Record<string, unknown>) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   const email = (user.email as string ?? "").trim().toLowerCase();
   const idx = sanitizeKey(email);
   try {
@@ -58,6 +73,8 @@ export async function createUserInDb(user: Record<string, unknown>) {
 }
 
 export async function findUserByEmail(email: string) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   const norm = email.trim().toLowerCase();
   const idx = sanitizeKey(norm);
   try {
@@ -84,6 +101,8 @@ export async function findUserByEmail(email: string) {
 
 // Admin functions
 export async function createAdminInDb(admin: Record<string, unknown>) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   const email = (admin.email as string ?? "").trim().toLowerCase();
   const idx = sanitizeKey(email);
   try {
@@ -103,6 +122,8 @@ export async function createAdminInDb(admin: Record<string, unknown>) {
 }
 
 export async function findAdminByEmail(email: string) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   const norm = email.trim().toLowerCase();
   const idx = sanitizeKey(norm);
   try {
@@ -121,6 +142,8 @@ export async function findAdminByEmail(email: string) {
 
 // Admin settings functions
 export async function loadAdminSettingsFromDb() {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   try {
     const snap = await get(ref(db, "admin_settings"));
     if (!snap.exists()) return null;
@@ -131,6 +154,8 @@ export async function loadAdminSettingsFromDb() {
 }
 
 export async function saveAdminSettingsToDb(settings: Record<string, unknown>) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   try {
     await set(ref(db, "admin_settings"), settings);
   } catch (err) {
@@ -140,6 +165,8 @@ export async function saveAdminSettingsToDb(settings: Record<string, unknown>) {
 
 // Certificate counter functions
 export async function loadCertificateCounterFromDb(): Promise<number> {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   try {
     const snap = await get(ref(db, "certificate_counter"));
     if (!snap.exists()) return 1;
@@ -150,6 +177,8 @@ export async function loadCertificateCounterFromDb(): Promise<number> {
 }
 
 export async function saveCertificateCounterToDb(counter: number) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   try {
     await set(ref(db, "certificate_counter"), counter);
   } catch (err) {
@@ -159,6 +188,8 @@ export async function saveCertificateCounterToDb(counter: number) {
 
 // Certificate functions
 export async function saveCertificateToDb(certificate: Record<string, unknown>) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   try {
     const id = certificate.id as string;
     await set(ref(db, `certificates/${id}`), certificate);
@@ -168,6 +199,8 @@ export async function saveCertificateToDb(certificate: Record<string, unknown>) 
 }
 
 export async function loadCertificatesFromDb() {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   try {
     const snap = await get(ref(db, "certificates"));
     if (!snap.exists()) return [];
@@ -185,6 +218,8 @@ export async function loadCertificatesFromDb() {
 
 // Payment functions
 export async function savePaymentToDb(payment: Record<string, unknown>) {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   try {
     const id = `${payment.certificateId}_${payment.userId}`;
     await set(ref(db, `payments/${id}`), payment);
@@ -194,6 +229,8 @@ export async function savePaymentToDb(payment: Record<string, unknown>) {
 }
 
 export async function loadPaymentsFromDb() {
+  ensureInitialized();
+  if (!db) throw new Error("Firebase not initialized or offline");
   try {
     const snap = await get(ref(db, "payments"));
     if (!snap.exists()) return [];
