@@ -134,9 +134,9 @@ export async function loginUser(email: string, password: string): Promise<AppUse
   try {
     const remote = await findUserByEmail(normalized);
     if (remote) {
-      const storedHash = (remote.passwordHash as string) ?? "";
+      const storedHash = (remote["passwordHash"] as string) ?? "";
       if (storedHash !== hash(password)) throw new Error("Invalid email or password");
-      const id = (remote.id as string) ?? (remote.email as string);
+      const id = (remote["id"] as string) ?? (remote["email"] as string);
       
       // Add/update user in local storage so session can find them on refresh
       const users = loadUsers();

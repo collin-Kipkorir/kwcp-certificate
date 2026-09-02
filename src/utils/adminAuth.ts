@@ -142,9 +142,9 @@ export async function loginAdminUser(email: string, password: string): Promise<A
   try {
     const remote = await findAdminByEmail(normalized);
     if (remote) {
-      const storedHash = (remote.passwordHash as string) ?? "";
+      const storedHash = (remote["passwordHash"] as string) ?? "";
       if (storedHash !== hash(password)) throw new Error("Invalid email or password");
-      const id = (remote.id as string) ?? (remote.email as string);
+      const id = (remote["id"] as string) ?? (remote["email"] as string);
 
       // Save to local storage
       const stored = loadStoredAdmins();

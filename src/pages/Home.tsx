@@ -474,7 +474,7 @@ export default function Home() {
         onSave={updateSettings}
         onResetCounter={() => {
           setCounter(1);
-          saveCounter(1);
+          saveCertificateCounter(1);
           toast.success("Certificate counter reset");
         }}
         onImported={hydrate}
