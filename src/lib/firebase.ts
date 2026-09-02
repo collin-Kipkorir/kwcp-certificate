@@ -54,7 +54,7 @@ function sanitizeKey(s: string) {
 export async function createUserInDb(user: Record<string, unknown>) {
   ensureInitialized();
   if (!db) throw new Error("Firebase not initialized or offline");
-  const email = (user.email as string ?? "").trim().toLowerCase();
+  const email = ((user["email"] as string) ?? "").trim().toLowerCase();
   const idx = sanitizeKey(email);
   try {
     const existing = await get(ref(db, `emails/${idx}`));
@@ -63,8 +63,8 @@ export async function createUserInDb(user: Record<string, unknown>) {
     }
 
     const updates: Record<string, unknown> = {};
-    updates[`users/${user.id}`] = user;
-    updates[`emails/${idx}`] = user.id;
+    updates[`users/${user["id"]}`] = user;
+    updates[`emails/${idx}`] = user["id"];
 
     await update(ref(db), updates);
   } catch (err) {
@@ -91,9 +91,10 @@ export async function findUserByEmail(email: string) {
     const q = query(ref(db, "users"), orderByChild("email"), equalTo(norm));
     const snap = await get(q as any);
     if (!snap.exists()) return null;
-    const val = snap.val();
+    const val = snap.val() as Record<string, Record<string, unknown>>;
     const key = Object.keys(val)[0];
-    return val[key] as Record<string, unknown>;
+    if (!key) return null;
+    return val[key];
   } catch (err) {
     throw new Error(`Firebase lookup failed: ${err instanceof Error ? err.message : String(err)}`);
   }
@@ -103,7 +104,7 @@ export async function findUserByEmail(email: string) {
 export async function createAdminInDb(admin: Record<string, unknown>) {
   ensureInitialized();
   if (!db) throw new Error("Firebase not initialized or offline");
-  const email = (admin.email as string ?? "").trim().toLowerCase();
+  const email = ((admin["email"] as string) ?? "").trim().toLowerCase();
   const idx = sanitizeKey(email);
   try {
     const existing = await get(ref(db, `admin_emails/${idx}`));
@@ -112,8 +113,8 @@ export async function createAdminInDb(admin: Record<string, unknown>) {
     }
 
     const updates: Record<string, unknown> = {};
-    updates[`admins/${admin.id}`] = admin;
-    updates[`admin_emails/${idx}`] = admin.id;
+    updates[`admins/${admin["id"]}`] = admin;
+    updates[`admin_emails/${idx}`] = admin["id"];
 
     await update(ref(db), updates);
   } catch (err) {
@@ -191,7 +192,7 @@ export async function saveCertificateToDb(certificate: Record<string, unknown>) 
   ensureInitialized();
   if (!db) throw new Error("Firebase not initialized or offline");
   try {
-    const id = certificate.id as string;
+    const id = certificate["id"] as string;
     await set(ref(db, `certificates/${id}`), certificate);
   } catch (err) {
     throw new Error(`Firebase certificate save failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -207,8 +208,8 @@ export async function loadCertificatesFromDb() {
     const data = snap.val() as Record<string, Record<string, unknown>>;
     // Convert to array and sort by createdAt descending
     return Object.values(data).sort((a, b) => {
-      const aTime = new Date(a.createdAt as string).getTime();
-      const bTime = new Date(b.createdAt as string).getTime();
+      const aTime = new Date((a["createdAt"] as string) ?? "").getTime();
+      const bTime = new Date((b["createdAt"] as string) ?? "").getTime();
       return bTime - aTime;
     });
   } catch (err) {
@@ -221,7 +222,7 @@ export async function savePaymentToDb(payment: Record<string, unknown>) {
   ensureInitialized();
   if (!db) throw new Error("Firebase not initialized or offline");
   try {
-    const id = `${payment.certificateId}_${payment.userId}`;
+    const id = `${payment["certificateId"]}_${payment["userId"]}`.replace(/undefined/g, "");
     await set(ref(db, `payments/${id}`), payment);
   } catch (err) {
     throw new Error(`Firebase payment save failed: ${err instanceof Error ? err.message : String(err)}`);

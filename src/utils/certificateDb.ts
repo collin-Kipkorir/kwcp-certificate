@@ -28,7 +28,7 @@ export async function loadCertificates(): Promise<GeneratedCertificate[]> {
 
   try {
     const certs = await loadCertificatesFromDb();
-    certificateCache = certs as GeneratedCertificate[];
+    certificateCache = certs as unknown as GeneratedCertificate[];
     return certificateCache;
   } catch (err) {
     console.warn("Failed to load certificates from Firebase:", err);
@@ -111,7 +111,7 @@ export async function loadPayments(): Promise<PaymentRecord[]> {
 
   try {
     const payments = await loadPaymentsFromDb();
-    paymentCache = payments as PaymentRecord[];
+    paymentCache = payments as unknown as PaymentRecord[];
     return paymentCache;
   } catch (err) {
     console.warn("Failed to load payments from Firebase:", err);

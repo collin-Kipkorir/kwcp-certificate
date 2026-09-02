@@ -57,7 +57,7 @@ export function PaymentModal({
 
     try {
       const admin = await loadAdminSettings();
-      const channelId = admin?.paylorChannelId;
+      const channelId = admin?.paylorChannelId as string | undefined;
 
       // Normalize to international MSISDN (e.g., 2547XXXXXXXX)
       let msisdn = normalized;
@@ -72,7 +72,7 @@ export function PaymentModal({
         reference,
         description: `Payment for ${certificateTitle}`,
       };
-      if (channelId) payload.channelId = channelId;
+      if (channelId) payload["channelId"] = channelId;
 
       // Call local proxy to avoid CORS and keep API keys server-side
       const res = await fetch(`/api/stk-push`, {
