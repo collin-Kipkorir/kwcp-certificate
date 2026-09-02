@@ -1,12 +1,8 @@
-@import "tailwindcss" source(none);
-@source "../src";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --font-serif-cert: "Times New Roman", "Liberation Serif", Georgia, serif;
-}
 
 /*
  * Design system definition.
@@ -22,7 +18,7 @@
  * 2. Register it in @theme inline as --color-<name>: var(--<name>)
  */
 
-@theme inline {
+:root {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
