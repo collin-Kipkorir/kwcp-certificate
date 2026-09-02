@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loadAdminSettings } from "@/utils/certificateDb";
 
 type Stage = "form" | "pending" | "success";
 
@@ -46,20 +47,85 @@ export function PaymentModal({
 
   const normalized = phone.replace(/\D/g, "");
 
-  const startPayment = () => {
+  const startPayment = async () => {
     if (normalized.length < 9) {
       setError("Enter a valid M-Pesa phone number");
       return;
     }
     setError("");
     setStage("pending");
-    // Simulated STK push — replaced by the live Daraja API later.
-    window.setTimeout(() => {
-      const receipt = `S${Date.now().toString(36).toUpperCase().slice(-8)}`;
-      setStage("success");
-      onPaid(phone, receipt);
-      window.setTimeout(() => onOpenChange(false), 1400);
-    }, 3200);
+
+    try {
+      const admin = await loadAdminSettings();
+      const channelId = admin?.paylorChannelId;
+
+      // Normalize to international MSISDN (e.g., 2547XXXXXXXX)
+      let msisdn = normalized;
+      if (msisdn.startsWith("0") && msisdn.length >= 9) msisdn = `254${msisdn.slice(1)}`;
+      if (msisdn.length === 9) msisdn = `254${msisdn}`;
+
+      const reference = `${certificateId}-${Date.now().toString(36)}`;
+
+      const payload: Record<string, unknown> = {
+        phone: msisdn,
+        amount,
+        reference,
+        description: `Payment for ${certificateTitle}`,
+      };
+      if (channelId) payload.channelId = channelId;
+
+      // Call local proxy to avoid CORS and keep API keys server-side
+      const res = await fetch(`/api/stk-push`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, channelId }),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`STK request failed: ${txt}`);
+      }
+
+      const data = (await res.json()) as { transactionId?: string; status?: string };
+      const txId = data.transactionId;
+      if (!txId) throw new Error("No transaction id returned from Paylor");
+
+      // Poll transaction status until COMPLETED or FAILED (timeout ~2 minutes)
+      const start = Date.now();
+      const timeoutMs = 120_000;
+
+      const poll = async (): Promise<any> => {
+        const q = await fetch(`/api/transactions/${encodeURIComponent(txId)}`);
+        if (!q.ok) throw new Error(`Transaction query failed: ${await q.text()}`);
+        return q.json();
+      };
+
+      while (Date.now() - start < timeoutMs) {
+        // small delay between polls
+        await new Promise((r) => setTimeout(r, 3000));
+        const statusResp = await poll();
+        const status = statusResp?.status as string | undefined;
+        if (status === "COMPLETED") {
+          // Use provider metadata or providerRef as receipt when available
+          const receipt = statusResp?.metadata?.mpesaReceipt ?? statusResp?.providerRef ?? txId;
+          setStage("success");
+          onPaid(msisdn, receipt);
+          window.setTimeout(() => onOpenChange(false), 1200);
+          return;
+        }
+        if (status === "FAILED") {
+          throw new Error("Payment failed or was declined");
+        }
+        // otherwise continue polling
+      }
+
+      throw new Error("Payment not confirmed in time — please try again or check later");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+      setStage("form");
+      console.error("STK push error:", err);
+    }
   };
 
   return (

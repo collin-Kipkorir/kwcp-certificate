@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ADMIN_PASSWORD } from "@/utils/constants";
+import { loginAdminUser, logoutAdminUser, type AdminUser } from "@/utils/adminAuth";
 import { exportStorage, importStorage } from "@/utils/localStorage";
 import type { AdminSettings } from "@/types/Certificate";
 
@@ -42,8 +42,42 @@ export function AdminModal({
   onImported,
 }: Props) {
   const [unlocked, setUnlocked] = useState(false);
+  const [admin, setAdmin] = useState<AdminUser | null>(null);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password) {
+      toast.error("Please enter email and password");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const adminUser = await loginAdminUser(email, password);
+      setAdmin(adminUser);
+      setUnlocked(true);
+      setPassword("");
+      toast.success(`Welcome, ${adminUser.fullName}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Invalid credentials";
+      toast.error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    logoutAdminUser();
+    setAdmin(null);
+    setUnlocked(false);
+    setEmail("");
+    setPassword("");
+    toast.success("Logged out");
+  };
 
   const handleUpload = async (
     file: File | undefined,
@@ -111,16 +145,19 @@ export function AdminModal({
         {!unlocked ? (
           <form
             className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (password === ADMIN_PASSWORD) {
-                setUnlocked(true);
-                toast.success("Admin unlocked");
-              } else {
-                toast.error("Incorrect password");
-              }
-            }}
+            onSubmit={handleLogin}
           >
+            <div className="space-y-2">
+              <Label htmlFor="admin-email">Email</Label>
+              <Input
+                id="admin-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@example.com"
+                disabled={isLoading}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="admin-password">Password</Label>
               <Input
@@ -129,14 +166,30 @@ export function AdminModal({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter admin password"
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full">
-              Unlock
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Unlock"}
             </Button>
           </form>
         ) : (
           <div className="space-y-5">
+            <div className="rounded-lg bg-muted p-3">
+              <p className="text-sm font-medium">
+                Logged in as: <span className="font-semibold">{admin?.fullName}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">{admin?.email}</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="mt-2"
+              >
+                Logout
+              </Button>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="admin-logo">Organization Logo</Label>
@@ -216,6 +269,28 @@ export function AdminModal({
                 maxLength={60}
                 onChange={(e) => onSave({ ...settings, ministry: e.target.value })}
               />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="paylor-api">Paylor API Key</Label>
+                <Input
+                  id="paylor-api"
+                  type="password"
+                  value={settings.paylorApiKey ?? ""}
+                  placeholder="sk_live_..."
+                  onChange={(e) => onSave({ ...settings, paylorApiKey: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="paylor-channel">Paylor Channel ID</Label>
+                <Input
+                  id="paylor-channel"
+                  value={settings.paylorChannelId ?? ""}
+                  placeholder="PAYL-XXXXXX"
+                  onChange={(e) => onSave({ ...settings, paylorChannelId: e.target.value })}
+                />
+              </div>
             </div>
 
             <div className="grid gap-2 sm:grid-cols-3">

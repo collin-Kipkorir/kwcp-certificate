@@ -1,5 +1,5 @@
 import type { AdminSettings } from "@/types/Certificate";
-
+import sign from "@/assets/sign.png";
 export const APP_NAME = "KWCP";
 export const APP_FULL_NAME = "Kenya Workers Certification Portal";
 
@@ -38,7 +38,9 @@ export const ADMIN_PASSWORD = "admin123";
 
 export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
   logo: "",
-  signature: "",
+  // Default signature uses the bundled asset `src/assets/sign.png`.
+  // To change, replace `src/assets/sign.png` with your preferred image (file name: sign.png).
+  signature: sign,
   seal: "",
   watermark: "",
   organization: "Republic of Kenya",
@@ -54,4 +56,6 @@ export const STORAGE_KEYS = {
   users: "kwcpUsers",
   session: "kwcpSession",
   payments: "kwcpPayments",
+  admins: "kwcpAdmins",
+  adminSession: "kwcpAdminSession",
 } as const;

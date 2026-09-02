@@ -398,6 +398,10 @@ The final application should look like a professional government certificate gen
 
  Users can instantly preview, generate, print, and download certificates without needing a server or database.
 
+Default Signature Image
+
+To set a default signature for all certificates, place your signature image file at `src/assets/sign.png` (file name must be `sign.png`). The app imports this asset as the default authorized signature; admins can still change it via the Admin modal.
+
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
@@ -418,3 +422,40 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Paylor (M-Pesa) proxy for STK Push
+
+This project includes a small local proxy to forward STK Push and transaction queries to Paylor so the frontend does not call Paylor directly (browsers will block those requests due to CORS) and your API key remains server-side.
+
+Quick setup
+
+1. Copy the example env and fill your keys:
+
+```bash
+cp .env.example .env
+# edit .env and set PAYLOR_API_KEY and PAYLOR_WEBHOOK_SECRET
+```
+
+2. Install proxy dependencies and start the proxy:
+
+```bash
+npm run setup-proxy
+npm run start:proxy
+```
+
+3. Start the frontend in another terminal:
+
+```bash
+npm run dev
+```
+
+Notes
+
+- The proxy runs on `PORT` from `.env` (default 3000) and accepts requests from `FRONTEND_ORIGIN`.
+- The frontend calls `/api/stk-push` and `/api/transactions/:txId` (no API key in client).
+- Webhooks are received at `/api/webhook` and verified using `PAYLOR_WEBHOOK_SECRET`.
+
+Security
+
+- Keep `PAYLOR_API_KEY` and `PAYLOR_WEBHOOK_SECRET` out of version control.
+- Use HTTPS in production and deploy the proxy to a secure server for production use.

@@ -19,7 +19,7 @@ type Mode = "register" | "login";
 
 export function AuthScreen() {
   const { login, register } = useAuth();
-  const [mode, setMode] = useState<Mode>("register");
+  const [mode, setMode] = useState<Mode>("login");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
@@ -86,27 +86,24 @@ export function AuthScreen() {
           </ul>
         </div>
 
-        <p className="text-xs opacity-70">
-          Records are stored securely on this device for the demo release.
-        </p>
       </aside>
 
       {/* Form panel */}
       <main className="flex items-center justify-center px-4 py-8 sm:px-8 sm:py-12">
         <div className="animate-in fade-in slide-in-from-bottom-3 w-full max-w-xl">
-          <div className="mb-6 flex items-center gap-3 text-white lg:hidden">
-            <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/20 bg-white/10">
-              <img src={coatOfArms} alt="Kenya coat of arms" className="h-8 w-8 object-contain" />
+          <div className="mb-6 flex flex-col items-center justify-center gap-2 text-center text-white lg:hidden">
+            <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/20 bg-white/10 shadow-sm">
+              <img src={coatOfArms} alt="Kenya coat of arms" className="h-10 w-10 object-contain" />
             </span>
             <div className="min-w-0">
-              <p className="text-lg font-bold">{APP_NAME}</p>
-              <p className="truncate text-xs opacity-80">{APP_FULL_NAME}</p>
+              <p className="text-xl font-bold tracking-tight">{APP_NAME}</p>
+              <p className="text-xs opacity-80">{APP_FULL_NAME}</p>
             </div>
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-4 shadow-xl sm:p-8">
             <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
-              {(["register", "login"] as Mode[]).map((m) => (
+              {(["login", "register"] as Mode[]).map((m) => (
                 <button
                   key={m}
                   type="button"

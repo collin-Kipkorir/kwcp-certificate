@@ -5,6 +5,9 @@ export interface AdminSettings {
   watermark: string;
   organization: string;
   ministry: string;
+  // Paylor credentials (optional) — managed by admin only
+  paylorApiKey?: string;
+  paylorChannelId?: string;
 }
 
 export interface GeneratedCertificate {

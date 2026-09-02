@@ -11,19 +11,23 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { isPaid, loadPayments, savePayment } from "@/utils/auth";
+import { isPaid } from "@/utils/auth";
 import { buildCertificateNumber, buildQrPayload, formatCertificateDate } from "@/utils/certificate";
 import { downloadPdf, downloadPng, printCertificate } from "@/utils/pdf";
 import {
   loadAdminSettings,
   loadCertificates,
-  loadCounter,
-  loadDraft,
-  loadTheme,
-  saveAdminSettings,
+  loadCertificateCounter,
   saveCertificates,
-  saveCounter,
+  saveCertificateCounter,
+  loadPayments,
+  savePayment,
+  saveAdminSettings,
+} from "@/utils/certificateDb";
+import {
+  loadDraft,
   saveDraft,
+  loadTheme,
   saveTheme,
 } from "@/utils/localStorage";
 import { DEFAULT_ADMIN_SETTINGS, priceFor } from "@/utils/constants";
@@ -70,11 +74,22 @@ export default function Home() {
     }
   };
 
-  const hydrate = () => {
-    setSettings(loadAdminSettings());
-    setCounter(loadCounter());
-    setCertificates(loadCertificates());
-    setPayments(loadPayments());
+  const hydrate = async () => {
+    try {
+      const [s, cnt, certs, pays] = await Promise.all([
+        loadAdminSettings(),
+        loadCertificateCounter(),
+        loadCertificates(),
+        loadPayments(),
+      ]);
+      setSettings(s);
+      setCounter(cnt);
+      setCertificates(certs);
+      setPayments(pays);
+    } catch (err) {
+      console.error("Failed to hydrate from Firebase:", err);
+      toast.error("Failed to load data from server");
+    }
   };
 
   useEffect(() => {
@@ -115,9 +130,14 @@ export default function Home() {
     document.documentElement.classList.toggle("dark", next === "dark");
   };
 
-  const updateSettings = (s: AdminSettings) => {
+  const updateSettings = async (s: AdminSettings) => {
     setSettings(s);
-    saveAdminSettings(s);
+    try {
+      await saveAdminSettings(s);
+    } catch (err) {
+      console.error("Failed to save admin settings:", err);
+      toast.error("Failed to save settings to server");
+    }
   };
 
   const handleGenerate = () => {
@@ -139,26 +159,32 @@ export default function Home() {
     }
 
     setGenerating(true);
-    window.setTimeout(() => {
-      const date = formatCertificateDate();
-      const id = buildCertificateNumber(counter);
-      const record: GeneratedCertificate = {
-        id,
-        name: name.trim(),
-        certificate,
-        date,
-        qr: buildQrPayload({ id, name: name.trim(), certificate, date }),
-        createdAt: new Date().toISOString(),
-      };
-      const nextList = [record, ...certificates];
-      setCertificates(nextList);
-      saveCertificates(nextList);
-      const nextCounter = counter + 1;
-      setCounter(nextCounter);
-      saveCounter(nextCounter);
-      setIssued(record);
-      setGenerating(false);
-      toast.success(`Certificate ${id} generated — pay to unlock the download`);
+    window.setTimeout(async () => {
+      try {
+        const date = formatCertificateDate();
+        const id = buildCertificateNumber(counter);
+        const record: GeneratedCertificate = {
+          id,
+          name: name.trim(),
+          certificate,
+          date,
+          qr: buildQrPayload({ id, name: name.trim(), certificate, date }),
+          createdAt: new Date().toISOString(),
+        };
+        const nextList = [record, ...certificates];
+        setCertificates(nextList);
+        await saveCertificates(nextList);
+        const nextCounter = counter + 1;
+        setCounter(nextCounter);
+        await saveCertificateCounter(nextCounter);
+        setIssued(record);
+        setGenerating(false);
+        toast.success(`Certificate ${id} generated — pay to unlock the download`);
+      } catch (err) {
+        console.error("Failed to generate certificate:", err);
+        toast.error("Failed to save certificate to server");
+        setGenerating(false);
+      }
     }, 700);
   };
 
@@ -189,7 +215,7 @@ export default function Home() {
     printCertificate();
   };
 
-  const handlePaid = (phone: string, receipt: string) => {
+  const handlePaid = async (phone: string, receipt: string) => {
     if (!issued || !user) return;
     const record: PaymentRecord = {
       certificateId: issued.id,
@@ -199,21 +225,27 @@ export default function Home() {
       receipt,
       paidAt: new Date().toISOString(),
     };
-    savePayment(record);
-    setPayments(loadPayments());
-    toast.success(`Payment confirmed · Receipt ${receipt}`);
+    try {
+      await savePayment(record);
+      const pays = await loadPayments();
+      setPayments(pays);
+      toast.success(`Payment confirmed · Receipt ${receipt}`);
 
-    // Auto-download the unlocked certificate as A4 landscape PDF.
-    window.setTimeout(async () => {
-      if (!sheetRef.current) return;
-      const t = toast.loading("Downloading your certificate…");
-      try {
-        await downloadPdf(sheetRef.current, `${issued.id}-${issued.name.replace(/\s+/g, "-")}`);
-        toast.success("Certificate downloaded", { id: t });
-      } catch {
-        toast.error("Could not create the file", { id: t });
-      }
-    }, 600);
+      // Auto-download the unlocked certificate as A4 landscape PDF.
+      window.setTimeout(async () => {
+        if (!sheetRef.current) return;
+        const t = toast.loading("Downloading your certificate…");
+        try {
+          await downloadPdf(sheetRef.current, `${issued.id}-${issued.name.replace(/\s+/g, "-")}`);
+          toast.success("Certificate downloaded", { id: t });
+        } catch {
+          toast.error("Could not create the file", { id: t });
+        }
+      }, 600);
+    } catch (err) {
+      console.error("Failed to save payment:", err);
+      toast.error("Failed to save payment to server");
+    }
   };
 
   const reset = () => {
@@ -385,22 +417,25 @@ export default function Home() {
             </div>
             <div className="relative overflow-hidden rounded-xl border border-border">
               {/*
-                The preview follows a three-state visual rule:
+                The preview follows a four-state visual rule:
                 - No data entered: invisible but still occupies layout (opacity 0)
-                - Form data entered but not yet issued: blurred (teaser)
-                - Issued and paid: fully visible
-                - Issued but unpaid: invisible behind the lock overlay
+                - Data entered but not issued: visible (teaser - no blur)
+                - Issued but unpaid: fully blurred (blur-3xl) with lock overlay
+                - Issued and paid: fully visible and sharp
               */}
               <div
                 className={(() => {
                   const hasInput = Boolean(name.trim() || certificate);
                   const isLocked = Boolean(issued && !paid);
                   let classes = "transition-[filter,opacity] duration-300";
-                  if (isLocked || hasInput) {
-                    classes += " pointer-events-none select-none blur-md";
-                  } else {
+                  if (isLocked) {
+                    // Issued but unpaid: blur it heavily
+                    classes += " pointer-events-none select-none blur-3xl";
+                  } else if (!hasInput) {
+                    // No data entered: hide it
                     classes += " opacity-0";
                   }
+                  // Otherwise (data entered but not issued, OR issued and paid): show normally
                   return classes;
                 })()}
                 aria-hidden={Boolean(issued && !paid) || (!name.trim() && !certificate) ? true : undefined}
