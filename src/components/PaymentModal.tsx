@@ -65,6 +65,8 @@ export function PaymentModal({
       if (msisdn.length === 9) msisdn = `254${msisdn}`;
 
       const reference = `${certificateId}-${Date.now().toString(36)}`;
+      // Idempotency key for safe retries — ensures duplicate charges are prevented
+      const idempotencyKey = `${reference}-stk-push`;
 
       const payload: Record<string, unknown> = {
         phone: msisdn,
@@ -77,13 +79,29 @@ export function PaymentModal({
       // Call local proxy to avoid CORS and keep API keys server-side
       const res = await fetch(`/api/stk-push`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+        },
         body: JSON.stringify({ ...payload, channelId }),
       });
 
       if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`STK request failed: ${txt}`);
+        // Try to parse Paylor error structure for better error messages
+        let errorMsg = `Payment request failed (${res.status})`;
+        try {
+          const errorData = (await res.json()) as any;
+          if (errorData.error?.details?.[0]?.message) {
+            errorMsg = errorData.error.details[0].message;
+          } else if (errorData.error?.message) {
+            errorMsg = errorData.error.message;
+          } else if (errorData.message) {
+            errorMsg = errorData.message;
+          }
+        } catch {
+          // Fallback if response isn't JSON
+        }
+        throw new Error(errorMsg);
       }
 
       const data = (await res.json()) as { transactionId?: string; status?: string };
@@ -96,7 +114,20 @@ export function PaymentModal({
 
       const poll = async (): Promise<any> => {
         const q = await fetch(`/api/transactions/${encodeURIComponent(txId)}`);
-        if (!q.ok) throw new Error(`Transaction query failed: ${await q.text()}`);
+        if (!q.ok) {
+          let errorMsg = `Transaction query failed (${q.status})`;
+          try {
+            const errorData = (await q.json()) as any;
+            if (errorData.error?.message) {
+              errorMsg = errorData.error.message;
+            } else if (errorData.message) {
+              errorMsg = errorData.message;
+            }
+          } catch {
+            // Fallback if response isn't JSON
+          }
+          throw new Error(errorMsg);
+        }
         return q.json();
       };
 
