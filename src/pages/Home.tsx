@@ -323,7 +323,7 @@ export default function Home() {
         <div className="mx-auto grid w-full max-w-7xl gap-5 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-center">
           <div className="min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-semibold tracking-wide text-primary uppercase">
-              <FiShield className="h-3.5 w-3.5" /> Government-style verified issuance
+              <FiShield className="h-3.5 w-3.5" /> Government verified issuance
             </span>
             <h2 className="mt-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
               Generate your official worker certificate
