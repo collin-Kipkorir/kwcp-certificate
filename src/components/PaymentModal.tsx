@@ -189,9 +189,6 @@ export function PaymentModal({
             <Button className="w-full" onClick={startPayment}>
               <FiSmartphone className="mr-2 h-4 w-4" /> Send STK Push
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
-              Simulated payment for this demo release.
-            </p>
           </div>
         ) : null}
 

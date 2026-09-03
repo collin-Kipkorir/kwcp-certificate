@@ -1,9 +1,9 @@
-import type { AdminSettings } from "@/types/Certificate";
+import type { AdminSettings, CertificateCatalogItem } from "@/types/Certificate";
 import sign from "@/assets/sign.png";
 export const APP_NAME = "KWCP";
 export const APP_FULL_NAME = "Kenya Workers Certification Portal";
 
-export const DEFAULT_CERTIFICATE_CATALOG = [
+export const DEFAULT_CERTIFICATE_CATALOG: CertificateCatalogItem[] = [
   { id: "food-handler", title: "Food Handler Certificate", price: 1500, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
   { id: "public-health", title: "Public Health and Hygiene", price: 1200, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
   { id: "work-ethics", title: "Work Ethics Certificate", price: 800, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
@@ -11,7 +11,7 @@ export const DEFAULT_CERTIFICATE_CATALOG = [
   { id: "customer-service", title: "Customer Service", price: 900, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
   { id: "occupational-safety", title: "Occupational Safety", price: 1800, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
   { id: "first-aid", title: "Basic First Aid", price: 1000, active: true, createdAt: "2024-01-01T00:00:00.000Z" },
-] as const;
+];
 
 export const CERTIFICATE_TYPES = DEFAULT_CERTIFICATE_CATALOG.filter((item) => item.active).map((item) => item.title);
 

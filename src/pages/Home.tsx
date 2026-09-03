@@ -49,7 +49,7 @@ export default function Home() {
   const [counter, setCounter] = useState(1);
   const [certificates, setCertificates] = useState<GeneratedCertificate[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
-  const [catalog, setCatalog] = useState<CertificateCatalogItem[]>(DEFAULT_CERTIFICATE_CATALOG as CertificateCatalogItem[]);
+  const [catalog, setCatalog] = useState<CertificateCatalogItem[]>(DEFAULT_CERTIFICATE_CATALOG);
   const [name, setName] = useState("");
   const [certificate, setCertificate] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -323,7 +323,7 @@ export default function Home() {
         <div className="mx-auto grid w-full max-w-7xl gap-5 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-center">
           <div className="min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-semibold tracking-wide text-primary uppercase">
-              <FiShield className="h-3.5 w-3.5" /> Government-style verified issuance
+              <FiShield className="h-3.5 w-3.5" /> Government verified issuance
             </span>
             <h2 className="mt-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
               Generate your official worker certificate
@@ -356,7 +356,7 @@ export default function Home() {
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 sm:py-8">
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
-          <div className="space-y-6">
+          <div className="order-2 space-y-6 lg:order-1">
             <CertificateForm
               name={name}
               certificate={certificate}
@@ -438,7 +438,7 @@ export default function Home() {
             </section>
           </div>
 
-          <section className="gov-card min-w-0 rounded-2xl border border-border bg-card p-3 sm:p-6">
+          <section className="gov-card order-1 min-w-0 rounded-2xl border border-border bg-card p-3 sm:p-6 lg:order-2">
             <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-between">
               <h2 className="truncate text-base font-semibold sm:text-lg">
                 Live Certificate Preview
