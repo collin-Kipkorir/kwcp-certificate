@@ -49,7 +49,7 @@ export default function Home() {
   const [counter, setCounter] = useState(1);
   const [certificates, setCertificates] = useState<GeneratedCertificate[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
-  const [catalog, setCatalog] = useState<CertificateCatalogItem[]>(DEFAULT_CERTIFICATE_CATALOG as CertificateCatalogItem[]);
+  const [catalog, setCatalog] = useState<CertificateCatalogItem[]>(DEFAULT_CERTIFICATE_CATALOG);
   const [name, setName] = useState("");
   const [certificate, setCertificate] = useState("");
   const [generating, setGenerating] = useState(false);

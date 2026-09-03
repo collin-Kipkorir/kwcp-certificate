@@ -151,14 +151,14 @@ export async function loadCertificateCatalog(): Promise<CertificateCatalogItem[]
   try {
     const items = await loadCertificateCatalogFromDb();
     if (items && items.length) {
-      certificateCatalogCache = items as CertificateCatalogItem[];
+      certificateCatalogCache = items as unknown as CertificateCatalogItem[];
       return certificateCatalogCache;
     }
   } catch (err) {
     console.warn("Failed to load certificate catalog from Firebase:", err);
   }
 
-  certificateCatalogCache = [...DEFAULT_CERTIFICATE_CATALOG] as CertificateCatalogItem[];
+  certificateCatalogCache = [...DEFAULT_CERTIFICATE_CATALOG];
   return certificateCatalogCache;
 }
 
