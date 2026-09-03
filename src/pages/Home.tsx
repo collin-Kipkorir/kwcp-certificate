@@ -356,7 +356,7 @@ export default function Home() {
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 sm:py-8">
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
-          <div className="space-y-6">
+          <div className="order-2 space-y-6 lg:order-1">
             <CertificateForm
               name={name}
               certificate={certificate}
@@ -438,7 +438,7 @@ export default function Home() {
             </section>
           </div>
 
-          <section className="gov-card min-w-0 rounded-2xl border border-border bg-card p-3 sm:p-6">
+          <section className="gov-card order-1 min-w-0 rounded-2xl border border-border bg-card p-3 sm:p-6 lg:order-2">
             <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-between">
               <h2 className="truncate text-base font-semibold sm:text-lg">
                 Live Certificate Preview
